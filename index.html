@@ -1267,13 +1267,42 @@ function pushMyData(){
   const playerRef = ref(db, 'players/' + playerId);
   get(playerRef).then(snapshot=>{
     const existing = snapshot.val();
-    const existingBest = existing && existing.bestSell ? existing.bestSell : null;
+
+    /* if Firebase record was deleted externally, wipe local records too */
+    if(!existing){
+      maxCoins=0;
+      sellHistory=[];
+      saveLocal();
+      return; /* don't re-upload */
+    }
+
+    /* preserve bestSell */
+    const existingBest = existing.bestSell || null;
     const finalBest = bestSell
       ? { donutIdx: bestSell.donutIdx, price: bestSell.price, pct: bestSell.pct }
       : existingBest;
-    const existingMax = existing && existing.maxCoins ? existing.maxCoins : 0;
+
+    /* preserve maxCoins — always take the higher of local vs DB */
+    const existingMax = existing.maxCoins || 0;
     const finalMax = Math.max(maxCoins, existingMax);
-    if(finalMax > maxCoins) maxCoins = finalMax; /* sync local with DB */
+    if(finalMax > maxCoins){
+      maxCoins = finalMax;
+      saveLocal();
+    }
+
+    /* restore sellHistory from DB if local is empty */
+    if(sellHistory.length===0 && existingBest){
+      sellHistory.push({
+        donutIdx: existingBest.donutIdx,
+        price: existingBest.price,
+        pct: existingBest.pct
+      });
+    }
+
+    /* only push if there's something meaningful */
+    const hasRecord = finalMax > 0 || finalBest !== null;
+    if(!hasRecord) return;
+
     set(playerRef, {
       nickname: myNickname,
       badges: SHOP_ITEMS.filter((_,i)=>purchased[i]).map(item=>item.emoji).join(''),
