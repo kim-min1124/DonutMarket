@@ -159,73 +159,14 @@ body{
 .modal-cancel{flex:1;padding:13px;border-radius:11px;border:1.5px solid var(--border);background:#fff;font-size:14px;font-weight:700;color:var(--text);font-family:'Nunito',sans-serif;cursor:pointer;}
 .modal-confirm{flex:1;padding:13px;border-radius:11px;border:none;background:var(--green);font-size:14px;font-weight:700;color:#fff;font-family:'Nunito',sans-serif;cursor:pointer;}
 
-/* ── DEBUG COLUMN ── */
-#debug-col{
-  background:var(--bg);
-  border-radius:20px;
-  overflow:hidden;
-  box-shadow:0 8px 32px rgba(0,0,0,0.12);
-}
-.dbg-header{padding:13px 16px 11px;background:var(--green);border-bottom:none;display:flex;align-items:center;justify-content:space-between;}
-.dbg-close-btn{background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:28px;height:28px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s;}
-.dbg-close-btn:hover{background:rgba(255,255,255,0.4);}
-.dbg-lock{padding:16px;display:flex;flex-direction:column;gap:8px;}
-.dbg-lock-top{display:flex;align-items:center;gap:6px;margin-bottom:2px;}
-.dbg-lock-icon-sm{font-size:16px;line-height:1;}
-.dbg-lock-label{font-size:12px;font-weight:800;color:var(--muted);}
-.dbg-lock-input{width:100%;border:2px solid var(--border);border-radius:10px;padding:9px 12px;font-size:14px;font-family:'Nunito',sans-serif;outline:none;text-align:center;transition:border-color 0.15s;color:var(--text);}
-.dbg-lock-input:focus{border-color:var(--green);}
-.dbg-lock-err{font-size:11px;font-weight:700;color:#E53E3E;min-height:14px;}
-.dbg-lock-btns{display:flex;gap:8px;}
-.dbg-lock-btn{flex:1;padding:10px;background:var(--green);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;transition:background 0.15s;}
-.dbg-lock-btn:hover{background:var(--green-dark);}
-.dbg-reset-lock-btn{flex:1;padding:10px;background:#FFF0F0;border:1.5px solid #FFCCCC;border-radius:10px;color:#E53E3E;font-size:12px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;transition:background 0.15s;}
-.dbg-reset-lock-btn:hover{background:#FFE0E0;}
-.dbg-header-title{font-family:'Fredoka One',sans-serif;font-size:17px;font-weight:400;color:#fff;letter-spacing:0.3px;}
-.dbg-body{padding:12px 12px 16px;display:flex;flex-direction:column;gap:10px;}
-.dbg-card{background:var(--card);border-radius:14px;padding:13px 14px;box-shadow:var(--shadow);}
-.dbg-section-title{font-size:10px;font-weight:800;color:var(--muted);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:8px;}
-.dbg-divider{height:1px;background:var(--border);margin:0 -2px;}
-.dbg-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-.dbg-row:last-child{margin-bottom:0;}
-.dbg-label{font-size:11px;color:var(--muted);width:60px;flex-shrink:0;line-height:1.3;font-weight:700;}
-.dbg-slider{flex:1;accent-color:var(--green);cursor:pointer;min-width:0;}
-.dbg-val{font-size:12px;font-weight:800;min-width:42px;text-align:right;}
-.dbg-val.up{color:var(--green-dark);}
-.dbg-val.down{color:var(--orange);}
-.dbg-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
-.dbg-stat{background:var(--bg);border-radius:9px;padding:9px 10px;border:1px solid var(--border);}
-.dbg-stat-label{font-size:9px;color:var(--muted);font-weight:800;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:3px;}
-.dbg-stat-val{font-size:13px;font-weight:800;color:var(--text);word-break:break-all;}
-.dbg-stat-val.up{color:var(--green-dark);}
-.dbg-stat-val.down{color:var(--orange);}
-.dbg-tick-btn{width:100%;padding:12px;background:var(--green);border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;transition:background 0.15s;box-shadow:0 4px 12px rgba(45,203,110,0.3);}
-.dbg-tick-btn:hover{background:var(--green-dark);}
-.dbg-reset-btn{width:100%;padding:12px;background:#fff;border:1.5px solid var(--border);border-radius:12px;color:var(--muted);font-size:13px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;transition:background 0.15s,color 0.15s;margin-top:6px;}
-.dbg-reset-btn:hover{background:#fff0f0;color:var(--red);border-color:#ffcccc;}
-.trend-row{display:flex;align-items:flex-start;gap:6px;padding:7px 0;border-bottom:1px solid var(--border);}
-.trend-row:last-child{border-bottom:none;}
-.trend-icon{font-size:18px;width:22px;text-align:center;flex-shrink:0;line-height:1;margin-top:1px;}
-.trend-info{flex:1;min-width:0;}
-.trend-name{font-size:11px;color:var(--muted);margin-bottom:2px;font-weight:700;}
-.trend-streak{font-size:10px;color:var(--muted);}
-.trend-right{display:flex;flex-direction:column;align-items:flex-end;gap:1px;flex-shrink:0;}
-.trend-price{font-size:13px;font-weight:800;color:var(--text);}
-.trend-pct{font-size:10px;font-weight:700;}
-.trend-pct.up{color:var(--green-dark);}
-.trend-pct.down{color:var(--orange);}
-/* inv editor inside debug */
-.inv-edit-row{display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid var(--border);}
-.inv-edit-row:last-child{border-bottom:none;}
-.inv-edit-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0;line-height:1;}
-.inv-edit-name{font-size:11px;color:var(--muted);flex:1;min-width:0;font-weight:700;}
-.inv-edit-btn{background:var(--bg);border:1.5px solid var(--border);border-radius:6px;width:24px;height:24px;color:var(--text);font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;}
-.inv-edit-btn:hover{background:var(--border);}
-.inv-edit-val{font-size:12px;font-weight:800;color:var(--text);min-width:44px;text-align:center;}
-.inv-edit-input{background:#f0f4ff;border:1.5px solid #d0d8f0;border-radius:6px;color:#1A1A2E;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;width:52px;text-align:center;padding:3px 4px;outline:none;}
-.inv-edit-input:focus{border-color:#2DCB6E;}
-.sel-back-arrow{font-size:28px;color:var(--muted);font-weight:400;flex-shrink:0;padding-right:2px;transition:color 0.15s;line-height:1;}
-.donut-sel-header:hover .sel-back-arrow{color:var(--text);}
+/* AMOUNT CONTROLS */
+.amount-controls{display:flex;align-items:center;gap:6px;}
+.amt-btn{background:#1A1A2E;color:#fff;border:none;border-radius:10px;width:34px;height:34px;font-size:18px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s,transform 0.1s;flex-shrink:0;user-select:none;}
+.amt-btn:hover{background:#333355;}
+.amt-btn:active{transform:scale(0.92);}
+.amt-max{width:auto;padding:0 10px;font-size:12px;letter-spacing:0.5px;}
+.amt-num{font-size:20px;font-weight:800;color:var(--text);min-width:50px;text-align:center;cursor:pointer;user-select:none;}
+.sell-inv-hint{font-size:11px;color:var(--muted);font-weight:700;}
 
 /* SHOP COLUMN */
 #shop-col{
@@ -238,7 +179,7 @@ body{
 .shop-col-header{background:var(--green);padding:13px 16px 11px;}
 .shop-col-title{font-family:'Fredoka One',sans-serif;font-size:17px;color:#fff;}
 #shop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px;}
-.shop-cell{background:var(--card);border-radius:14px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;box-shadow:var(--shadow);transition:transform 0.15s,box-shadow 0.15s;position:relative;}
+.shop-cell{background:var(--card);border-radius:14px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;box-shadow:var(--shadow);transition:transform 0.15s,box-shadow 0.15s;position:relative;user-select:none;-webkit-user-select:none;}
 .shop-cell:hover:not(.sold){transform:translateY(-2px);box-shadow:var(--shadow-md);}
 .shop-cell:active:not(.sold){transform:scale(0.98);}
 .shop-cell.sold{cursor:default;background:#fafafa;}
@@ -247,17 +188,20 @@ body{
 .shop-item-price{display:flex;align-items:center;gap:2px;font-size:10px;font-weight:800;color:var(--yellow-dark);}
 .shop-sold-badge{position:absolute;inset:0;background:rgba(255,255,255,0.82);display:flex;align-items:center;justify-content:center;border-radius:14px;}
 .shop-sold-text{font-size:11px;font-weight:800;color:var(--muted);}
-/* AMOUNT CONTROLS */
-.amount-controls{display:flex;align-items:center;gap:6px;}
-.amt-btn{background:#1A1A2E;color:#fff;border:none;border-radius:10px;width:34px;height:34px;font-size:18px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s,transform 0.1s;flex-shrink:0;}
-.amt-btn:hover{background:#333355;}
-.amt-btn:active{transform:scale(0.92);}
-.amt-max{width:auto;padding:0 10px;font-size:12px;letter-spacing:0.5px;}
-.amt-num{font-size:20px;font-weight:800;color:var(--text);min-width:50px;text-align:center;cursor:pointer;}
-.sell-inv-hint{font-size:11px;color:var(--muted);font-weight:700;}
-/* inventory dim */
-.inv-row{transition:opacity 0.25s;}
-.inv-row.dimmed{opacity:0.35;}
+
+/* RESET PANEL */
+#reset-panel{
+  width:100%;
+}
+.reset-panel-btn{
+  width:100%;padding:13px 16px;
+  background:#fff;border:1.5px solid #FFCCCC;border-radius:20px;
+  color:#E53E3E;font-size:14px;font-weight:800;
+  font-family:'Nunito',sans-serif;cursor:pointer;
+  transition:background 0.15s;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+.reset-panel-btn:hover{background:#fff0f0;}
 
 /* LEADERBOARD */
 #lb-col{width:100%;display:flex;flex-direction:column;gap:12px;}
@@ -534,93 +478,10 @@ body{
 
 </div><!-- /#lb-col -->
 
-<!-- ══ DEBUG COLUMN ══ -->
-<div id="debug-col">
-  <div class="dbg-header">
-    <div class="dbg-header-title">🔧 Debug Tool</div>
-    <button class="dbg-close-btn" id="dbg-close-btn" onclick="lockDebug()" style="display:none;">✕</button>
-  </div>
-  <!-- LOCK SCREEN -->
-  <div id="dbg-lock" class="dbg-lock">
-    <div class="dbg-lock-top">
-      <span class="dbg-lock-icon-sm">🔒</span>
-      <span class="dbg-lock-label">비밀번호 입력</span>
-    </div>
-    <input class="dbg-lock-input" id="dbg-pw-input" type="password" placeholder="••••••••••"
-      onkeydown="if(event.key==='Enter')checkDebugPw()">
-    <div class="dbg-lock-err" id="dbg-pw-err"></div>
-    <div class="dbg-lock-btns">
-      <button class="dbg-lock-btn" onclick="checkDebugPw()">확인</button>
-      <button class="dbg-reset-lock-btn" onclick="confirmReset()">🔄 게임 초기화</button>
-    </div>
-  </div>
-  <!-- ACTUAL BODY (hidden until unlocked) -->
-  <div class="dbg-body" id="dbg-body-inner" style="display:none;">
-
-    <!-- 변동폭 설정 -->
-    <div class="dbg-card">
-      <div class="dbg-section-title">상승폭 설정</div>
-      <div class="dbg-row">
-        <span class="dbg-label">최소 상승</span>
-        <input type="range" class="dbg-slider" id="sl-up-min" min="1" max="49" value="1" step="1" oninput="updateCfg()">
-        <span class="dbg-val up" id="dv-up-min">+10%</span>
-      </div>
-      <div class="dbg-row">
-        <span class="dbg-label">최대 상승</span>
-        <input type="range" class="dbg-slider" id="sl-up-max" min="2" max="50" value="25" step="1" oninput="updateCfg()">
-        <span class="dbg-val up" id="dv-up-max">+500%</span>
-      </div>
-      <div class="dbg-divider"></div>
-      <div class="dbg-section-title" style="margin-top:10px;">하락폭 설정</div>
-      <div class="dbg-row">
-        <span class="dbg-label">최소 하락</span>
-        <input type="range" class="dbg-slider" id="sl-dn-min" min="1" max="49" value="1" step="1" oninput="updateCfg()">
-        <span class="dbg-val down" id="dv-dn-min">-10%</span>
-      </div>
-      <div class="dbg-row">
-        <span class="dbg-label">최대 하락</span>
-        <input type="range" class="dbg-slider" id="sl-dn-max" min="1" max="50" value="8" step="1" oninput="updateCfg()">
-        <span class="dbg-val down" id="dv-dn-max">-80%</span>
-      </div>
-    </div>
-
-    <!-- 현재 적용값 -->
-    <div class="dbg-card">
-      <div class="dbg-section-title">현재 적용된 변동폭</div>
-      <div class="dbg-stat-grid">
-        <div class="dbg-stat"><div class="dbg-stat-label">상승 범위</div><div class="dbg-stat-val up" id="cur-up-range">+10~+500%</div></div>
-        <div class="dbg-stat"><div class="dbg-stat-label">하락 범위</div><div class="dbg-stat-val down" id="cur-dn-range">-10~-80%</div></div>
-        <div class="dbg-stat"><div class="dbg-stat-label">마지막 상승</div><div class="dbg-stat-val up" id="last-up-val">—</div></div>
-        <div class="dbg-stat"><div class="dbg-stat-label">마지막 하락</div><div class="dbg-stat-val down" id="last-dn-val">—</div></div>
-      </div>
-    </div>
-
-    <!-- 도넛별 추세 -->
-    <div class="dbg-card">
-      <div class="dbg-section-title">도넛별 추세</div>
-      <div id="trend-table"></div>
-    </div>
-
-    <!-- 보유 코인 + 도넛 수량 -->
-    <div class="dbg-card">
-      <div class="dbg-section-title">보유 코인 조절</div>
-      <div class="dbg-row" style="margin-bottom:0;">
-        <span class="dbg-label" style="width:auto;flex:1;">보유 코인</span>
-        <button class="inv-edit-btn" onclick="adjustCoins(-1000)">−</button>
-        <input class="inv-edit-input" id="coin-inp" type="number" value="0" min="0" oninput="setCoins(this.value)" style="width:80px;">
-        <button class="inv-edit-btn" onclick="adjustCoins(1000)">+</button>
-      </div>
-      <div class="dbg-divider" style="margin:12px 0;"></div>
-      <div class="dbg-section-title">도넛 수량 조절</div>
-      <div id="inv-editor"></div>
-    </div>
-
-    <button class="dbg-tick-btn" onclick="debugTick()">⏩ 지금 시세 갱신</button>
-    <button class="dbg-reset-btn" onclick="debugReset()">↺ 초기화</button>
-
-  </div>
-  </div><!-- /#dbg-body-inner -->
-</div><!-- /#debug-col -->
+<!-- ══ RESET PANEL ══ -->
+<div id="reset-panel">
+  <button class="reset-panel-btn" onclick="confirmReset()">🔄 게임 초기화</button>
+</div>
 
 </div><!-- /#right-col -->
 
@@ -655,7 +516,7 @@ let amount = 0;
 let timerSec = 180;
 let adCooldown = false;
 let adWatchCount = 0;
-let cfg = {upMin:1, upMax:25, dnMin:1, dnMax:8};
+
 let lastUpPct = null, lastDnPct = null;
 
 const SHOP_ITEMS = [
@@ -730,17 +591,17 @@ function nextPrice(idx){
     pct=(Math.floor(Math.random()*100)+1)*10;
     lastUpPct=pct;
   } else if(goUp){
-    pct=(Math.floor(Math.random()*(cfg.upMax-cfg.upMin+1))+cfg.upMin)*10;
+    pct=(Math.floor(Math.random()*(25-1+1))+1)*10;
     lastUpPct=pct;
   } else {
-    pct=-((Math.floor(Math.random()*(cfg.dnMax-cfg.dnMin+1))+cfg.dnMin)*10);
+    pct=-((Math.floor(Math.random()*(8-1+1))+1)*10);
     lastDnPct=Math.abs(pct);
   }
   /* ceiling: if result would exceed 100x basePrice, force down instead */
   const ceiling = 1500;
   if(goUp && Math.floor(s.price*(1+pct/100)) >= ceiling){
     goUp=false;
-    pct=-((Math.floor(Math.random()*(cfg.dnMax-cfg.dnMin+1))+cfg.dnMin)*10);
+    pct=-((Math.floor(Math.random()*(8-1+1))+1)*10);
     lastDnPct=Math.abs(pct);
   }
   const rawPrice=Math.floor(s.price*(1+pct/100));
@@ -757,7 +618,7 @@ function nextPrice(idx){
 function tickAll(){
   for(let i=0;i<DONUTS.length;i++) nextPrice(i);
   timerSec=300;
-  renderList(); renderDebug(); renderLeaderboard();
+  renderList(); renderLeaderboard();
   if(document.getElementById('sell-panel').style.display==='block') renderSell();
 }
 
@@ -940,7 +801,7 @@ function doSell(){
   spawnCoins(earned);
   showToast(E.coin+' '+fmt(earned)+' 코인 획득!');
   amount=0;
-  setTimeout(()=>{renderSell();goHome();renderList();renderDebug();renderShop();renderLeaderboard();},900);
+  setTimeout(()=>{renderSell();goHome();renderList();renderShop();renderLeaderboard();},900);
 }
 
 function spawnCoins(earned){
@@ -991,146 +852,14 @@ function updateTimer(){
 /* ── DEBUG ── */
 function confirmReset(){
   if(confirm('게임을 초기화할까요? (닉네임은 유지됩니다)')){
-    debugReset();
+    gameReset();
     showToast('↺ 게임이 초기화되었습니다!');
   }
 }
 
-function checkDebugPw(){
-  const input=document.getElementById('dbg-pw-input');
-  const err=document.getElementById('dbg-pw-err');
-  if(input.value==='kimmin1124'){
-    document.getElementById('dbg-lock').style.display='none';
-    document.getElementById('dbg-body-inner').style.display='block';
-    document.getElementById('dbg-close-btn').style.display='flex';
-    document.getElementById('right-col').classList.add('debug-open');
-    document.getElementById('layout').classList.add('debug-wide');
-    renderDebug();
-  } else {
-    err.textContent='비밀번호가 틀렸습니다.';
-    input.value='';
-    input.focus();
-    setTimeout(()=>err.textContent='',2000);
-  }
-}
-
-function lockDebug(){
-  document.getElementById('dbg-lock').style.display='flex';
-  document.getElementById('dbg-body-inner').style.display='none';
-  document.getElementById('dbg-close-btn').style.display='none';
-  document.getElementById('dbg-pw-input').value='';
-  document.getElementById('dbg-pw-err').textContent='';
-  document.getElementById('right-col').classList.remove('debug-open');
-  document.getElementById('layout').classList.remove('debug-wide');
-}
-
-function updateCfg(){
-  let uMin=+document.getElementById('sl-up-min').value;
-  let uMax=+document.getElementById('sl-up-max').value;
-  let dMin=+document.getElementById('sl-dn-min').value;
-  let dMax=+document.getElementById('sl-dn-max').value;
-  if(uMin>=uMax){uMax=Math.min(50,uMin+1);document.getElementById('sl-up-max').value=uMax;}
-  if(dMin>=dMax){dMax=Math.min(50,dMin+1);document.getElementById('sl-dn-max').value=dMax;}
-  cfg={upMin:uMin,upMax:uMax,dnMin:dMin,dnMax:dMax};
-  document.getElementById('dv-up-min').textContent=`+${uMin*10}%`;
-  document.getElementById('dv-up-max').textContent=`+${uMax*10}%`;
-  document.getElementById('dv-dn-min').textContent=`-${dMin*10}%`;
-  document.getElementById('dv-dn-max').textContent=`-${dMax*10}%`;
-  document.getElementById('cur-up-range').textContent=`+${uMin*10}~+${uMax*10}%`;
-  document.getElementById('cur-dn-range').textContent=`-${dMin*10}~-${dMax*10}%`;
-}
-
-function renderDebug(){
-  document.getElementById('last-up-val').textContent=lastUpPct!==null?`+${lastUpPct}%`:'—';
-  document.getElementById('last-dn-val').textContent=lastDnPct!==null?`-${lastDnPct}%`:'—';
-
-  /* trend table */
-  const tt=document.getElementById('trend-table');
-  tt.innerHTML='';
-  DONUTS.forEach((d,i)=>{
-    const s=state[i];
-    const dir=s.lastDir;
-    const pct=Math.round((s.price-d.basePrice)/d.basePrice*100);
-    const pctTxt=pct>0?`+${pct}%`:pct<0?`${pct}%`:'0%';
-    const pctCls=pct>0?'up':pct<0?'down':'';
-    const contProb=s.streak>=4?10:s.streak===3?20:s.streak===2?35:50;
-    const arrow=dir==='up'?'▲':dir==='down'?'▼':'·';
-    const streakTxt=dir?`${arrow}${s.streak}연속 · 지속 ${contProb}%`:'시작 전';
-    const row=document.createElement('div');row.className='trend-row';
-    row.innerHTML=`<span class="trend-icon"></span>
-      <div class="trend-info">
-        <div class="trend-name">${d.name}</div>
-        <div class="trend-streak">${streakTxt}</div>
-      </div>
-      <div class="trend-right">
-        <span class="trend-price">${fmt(s.price)}</span>
-        <span class="trend-pct ${pctCls}">${pctTxt}</span>
-      </div>`;
-    setEmoji(row.querySelector('.trend-icon'), d.emoji);
-    tt.appendChild(row);
-  });
-
-  /* inv editor */
-  renderInvEditor();
-
-}
-
-function renderInvEditor(){
-  const ed=document.getElementById('inv-editor');
-  ed.innerHTML='';
-  DONUTS.forEach((d,i)=>{
-    const s=state[i];
-    const row=document.createElement('div');row.className='inv-edit-row';
-    row.innerHTML=`
-      <span class="inv-edit-icon"></span>
-      <span class="inv-edit-name">${d.name}</span>
-      <button class="inv-edit-btn" onclick="adjustInv(${i},-100)" title="-100">−</button>
-      <input class="inv-edit-input" id="inv-inp-${i}" type="number" value="${s.inv}" min="0" oninput="setInv(${i},this.value)" />
-      <button class="inv-edit-btn" onclick="adjustInv(${i},100)" title="+100">+</button>`;
-    setEmoji(row.querySelector('.inv-edit-icon'), d.emoji);
-    ed.appendChild(row);
-  });
-}
-
-function adjustInv(idx, delta){
-  state[idx].inv=Math.max(0,state[idx].inv+delta);
-  const inp=document.getElementById('inv-inp-'+idx);
-  if(inp) inp.value=state[idx].inv;
-  updateInvDisplay();
-  if(document.getElementById('sell-panel').style.display==='block'&&selected===idx) renderSell();
-  renderList();
-}
-
-function setInv(idx, val){
-  state[idx].inv=Math.max(0,parseInt(val)||0);
-  const inp=document.getElementById('inv-inp-'+idx);
-  if(inp) inp.value=state[idx].inv;
-  updateInvDisplay();
-  if(document.getElementById('sell-panel').style.display==='block'&&selected===idx) renderSell();
-  renderList();
-}
-
-function adjustCoins(delta){
-  coins=Math.max(0,coins+delta);
-  document.getElementById('coin-count').textContent=fmt(coins);
-  const inp=document.getElementById('coin-inp');
-  if(inp && document.activeElement!==inp) inp.value=coins;
-  renderShop();renderLeaderboard();
-}
-
-function setCoins(val){
-  coins=Math.max(0,parseInt(val)||0);
-  document.getElementById('coin-count').textContent=fmt(coins);
-  renderShop();renderLeaderboard();
-}
-
-function debugTick(){tickAll();showToast(E.fast+' 강제 시세 갱신!');}
-
-function debugReset(){
+function gameReset(){
   coins=0;
   document.getElementById('coin-count').textContent=fmt(coins);
-  const ci=document.getElementById('coin-inp');
-  if(ci) ci.value=0;
   state=DONUTS.map(d=>({
     price:d.basePrice,
     prevPrice:d.basePrice,
@@ -1143,19 +872,39 @@ function debugReset(){
   timerSec=180;
   amount=0;
   purchased=[false,false,false,false,false,false];
+  updateCharItems();
   adWatchCount=0;
   sellHistory=[];
   const adNum=document.getElementById('ad-count-num');
   if(adNum) adNum.textContent=0;
-  updateCharItems();
   goHome();
   renderList();
   updateInvDisplay();
-  renderDebug();
-  renderShop();renderLeaderboard();
-  /* cfg and sliders are intentionally preserved */
-  showToast('↺ 초기화 완료! (변동폭 설정 유지)');
+  renderShop();
+  renderLeaderboard();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* ── SHOP ── */
 function renderShop(){
@@ -1203,7 +952,7 @@ function renderShop(){
 function buyItem(i){
   const item=SHOP_ITEMS[i];
   if(purchased[i]) return;
-  if(coins<item.price){return;}
+  if(coins<item.price){showToast('코인이 부족합니다!');return;}
   coins-=item.price;
   purchased[i]=true;
   document.getElementById('coin-count').textContent=fmt(coins);
@@ -1395,12 +1144,8 @@ function renderLeaderboard(){
 /* ── INIT ── */
 initEmoji();
 renderList();
-updateCfg();
-renderDebug();
 renderShop();
 renderLeaderboard();
-const _ci=document.getElementById('coin-inp');
-if(_ci) _ci.value=coins;
 setInterval(updateTimer,1000);
 </script>
 
