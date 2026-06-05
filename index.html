@@ -1179,16 +1179,21 @@ function pushMyData(){
   const bestSell = sellHistory.length > 0
     ? sellHistory.reduce((a,b)=>a.price>b.price?a:b)
     : null;
-  set(ref(db, 'players/' + playerId), {
-    nickname: myNickname,
-    badges: SHOP_ITEMS.filter((_,i)=>purchased[i]).map(item=>item.emoji).join(''),
-    coins: coins,
-    bestSell: bestSell ? {
-      donutIdx: bestSell.donutIdx,
-      price: bestSell.price,
-      pct: bestSell.pct
-    } : null,
-    updatedAt: Date.now()
+  /* read existing bestSell from DB first to preserve it if sellHistory is empty */
+  const playerRef = ref(db, 'players/' + playerId);
+  get(playerRef).then(snapshot=>{
+    const existing = snapshot.val();
+    const existingBest = existing && existing.bestSell ? existing.bestSell : null;
+    const finalBest = bestSell
+      ? { donutIdx: bestSell.donutIdx, price: bestSell.price, pct: bestSell.pct }
+      : existingBest;
+    set(playerRef, {
+      nickname: myNickname,
+      badges: SHOP_ITEMS.filter((_,i)=>purchased[i]).map(item=>item.emoji).join(''),
+      coins: coins,
+      bestSell: finalBest,
+      updatedAt: Date.now()
+    });
   });
 }
 
