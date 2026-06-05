@@ -803,7 +803,7 @@ function doSell(){
   spawnCoins(earned);
   showToast(E.coin+' '+fmt(earned)+' 코인 획득!');
   amount=0;
-  setTimeout(()=>{renderSell();goHome();renderList();renderShop();renderLeaderboard();},900);
+  setTimeout(()=>{renderSell();goHome();renderList();renderShop();renderLeaderboard();saveLocal();},900);
 }
 
 function spawnCoins(earned){
@@ -839,6 +839,7 @@ function watchAd(){
   adWatchCount++;
   const num=document.getElementById('ad-count-num');
   if(num) num.textContent=adWatchCount;
+  saveLocal();
 
 }
 
@@ -884,6 +885,7 @@ function gameReset(){
   updateInvDisplay();
   renderShop();
   renderLeaderboard();
+  saveLocal();
 }
 
 
@@ -994,7 +996,7 @@ function buyItem(i){
       badge.style.animation='';
     });
   }
-  setTimeout(()=>{renderShop();renderLeaderboard();},400);
+  setTimeout(()=>{renderShop();renderLeaderboard();saveLocal();},400);
   showToast(item.emoji+' '+item.name+' 구매 완료!');
 }
 
@@ -1042,6 +1044,7 @@ function setNickname(){
     input.value='';
   }
   renderLeaderboard();
+  saveLocal();
   showToast('닉네임이 설정되었습니다: '+myNickname);
 }
 
@@ -1143,12 +1146,47 @@ function renderLeaderboard(){
   }
 }
 
+/* ── SAVE / LOAD ── */
+function saveLocal(){
+  try{
+    localStorage.setItem('dm_coins', coins);
+    localStorage.setItem('dm_maxCoins', maxCoins);
+    localStorage.setItem('dm_nickname', myNickname);
+    localStorage.setItem('dm_purchased', JSON.stringify(purchased));
+    localStorage.setItem('dm_sellHistory', JSON.stringify(sellHistory));
+    localStorage.setItem('dm_adCount', adWatchCount);
+  }catch(e){}
+}
+
+function loadLocal(){
+  try{
+    const c=localStorage.getItem('dm_coins');
+    if(c!==null) coins=parseInt(c)||0;
+    const mc=localStorage.getItem('dm_maxCoins');
+    if(mc!==null) maxCoins=parseInt(mc)||0;
+    const nn=localStorage.getItem('dm_nickname');
+    if(nn) myNickname=nn;
+    const pu=localStorage.getItem('dm_purchased');
+    if(pu) purchased=JSON.parse(pu);
+    const sh=localStorage.getItem('dm_sellHistory');
+    if(sh) sellHistory=JSON.parse(sh);
+    const ad=localStorage.getItem('dm_adCount');
+    if(ad!==null) adWatchCount=parseInt(ad)||0;
+  }catch(e){}
+}
+
 /* ── INIT ── */
+loadLocal();
 initEmoji();
+updateCharItems();
+document.getElementById('coin-count').textContent=fmt(coins);
+const adNum=document.getElementById('ad-count-num');
+if(adNum) adNum.textContent=adWatchCount;
 renderList();
 renderShop();
 renderLeaderboard();
 setInterval(updateTimer,1000);
+setInterval(saveLocal,5000); /* auto-save every 5s */
 </script>
 
 <script type="module">
