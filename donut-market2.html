@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Donut Market</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --green:#2DCB6E;--green-dark:#1fa855;
+  --orange:#FF6B35;
+  --yellow-dark:#d4a017;
+  --bg:#F5F5F0;--card:#FFFFFF;
+  --text:#1A1A2E;--muted:#8B8B9A;
+  --border:#E8E8F0;
+  --shadow:0 2px 12px rgba(0,0,0,0.08);
+  --shadow-md:0 4px 20px rgba(0,0,0,0.12);
+  --market-w:380px;
+  --debug-w:320px;
+}
+body{
+  font-family:'Nunito',sans-serif;
+  background:#E8E8E0;
+  min-height:100vh;
+  display:flex;justify-content:center;align-items:flex-start;
+  padding:24px 16px 40px;
+}
+#layout{
+  display:flex;
+  gap:16px;
+  align-items:flex-start;
+  width:100%;
+  max-width:calc(var(--market-w) + var(--debug-w) + 16px);
+  transition:max-width 0.3s ease;
+}
+#layout.debug-wide{
+  max-width:calc(var(--market-w) + var(--debug-w) + var(--debug-w) + 32px);
+}
+#left-col{
+  width:var(--market-w);
+  flex-shrink:0;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+#right-col{
+  flex:1;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+/* when debug unlocked: lb-col and debug-col side by side */
+#right-col.debug-open{
+  flex-direction:row;
+  align-items:flex-start;
+  gap:16px;
+}
+#right-col.debug-open #lb-col{
+  flex:1;
+  min-width:0;
+}
+#right-col.debug-open #debug-col{
+  width:var(--debug-w);
+  flex-shrink:0;
+}
+#lb-col{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+#debug-col{
+  width:100%;
+}
+
+/* ── MARKET COLUMN ── */
+#market-col{
+  width:100%;
+  background:var(--bg);
+  border-radius:24px;
+  overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,0.14);
+  position:relative;
+}
+
+/* CHARACTER ZONE */
+.char-zone{height:180px;background:linear-gradient(180deg,#FFF9E6 0%,#FFE8A3 100%);position:relative;overflow:hidden;}
+.char-zone::before{content:'';position:absolute;bottom:0;left:0;right:0;height:55px;background:linear-gradient(0deg,#E8F5D0 0%,transparent 100%);}
+.coin-display{position:absolute;top:14px;left:14px;background:rgba(255,255,255,0.92);border-radius:50px;padding:7px 13px;display:flex;align-items:center;gap:6px;font-weight:800;font-size:14px;color:var(--text);box-shadow:var(--shadow);}
+.inventory-panel{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:3px;}
+.inv-row{background:rgba(255,255,255,0.88);border-radius:50px;padding:4px 9px;display:flex;align-items:center;gap:5px;font-weight:700;font-size:12px;color:var(--text);box-shadow:0 1px 5px rgba(0,0,0,0.08);}
+.inv-row span:last-child{min-width:34px;text-align:right;}
+.character{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);font-size:64px;animation:bob 2s ease-in-out infinite;filter:drop-shadow(0 6px 12px rgba(0,0,0,0.1));cursor:default;user-select:none;line-height:1;}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(-7px);}}
+
+/* MARKET HEADER */
+.market-header{background:var(--green);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;}
+.market-title{font-family:'Fredoka One',sans-serif;font-size:20px;color:#fff;letter-spacing:0.5px;}
+.back-btn{background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:#fff;transition:background 0.15s;}
+.back-btn:hover{background:rgba(255,255,255,0.35);}
+
+/* TIMER BAR */
+.timer-bar{background:#fff;padding:9px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.timer-label{font-size:12px;color:var(--muted);}
+.timer-val{color:var(--green);font-weight:800;font-size:13px;}
+.ad-btn{background:linear-gradient(135deg,#2DCB6E 0%,#1aa854 50%,#0d9e4a 100%);color:#fff;border:none;border-radius:18px;padding:6px 14px;font-size:11px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:filter 0.15s,transform 0.1s,background 0.15s;box-shadow:0 2px 8px rgba(45,203,110,0.45),inset 0 1px 0 rgba(255,255,255,0.2);letter-spacing:0.2px;}
+.ad-btn:hover{filter:brightness(1.1);transform:scale(1.03);}
+.ad-btn:active{transform:scale(0.96);}
+.ad-btn.cooldown{background:var(--muted);box-shadow:none;cursor:not-allowed;filter:none;}
+
+/* DONUT LIST */
+.donut-list{padding:10px 14px;display:flex;flex-direction:column;gap:8px;}
+.donut-card{background:var(--card);border-radius:14px;padding:13px 15px;display:flex;align-items:center;gap:11px;cursor:pointer;box-shadow:var(--shadow);transition:transform 0.15s,box-shadow 0.15s;}
+.donut-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
+.donut-card:active{transform:scale(0.98);}
+.donut-icon{font-size:32px;flex-shrink:0;width:38px;text-align:center;line-height:1;}
+.donut-info{flex:1;min-width:0;}
+.donut-name{font-weight:800;font-size:13px;color:var(--text);margin-bottom:1px;}
+.donut-inv{font-size:11px;color:var(--muted);}
+.graph-area{width:72px;height:36px;flex-shrink:0;}
+.price-area{display:flex;align-items:center;gap:3px;flex-shrink:0;font-weight:800;font-size:14px;color:var(--text);}
+.chevron{font-size:26px;color:var(--muted);flex-shrink:0;}
+.price-badge{font-size:10px;font-weight:700;padding:2px 6px;border-radius:50px;margin-top:3px;display:inline-block;}
+.price-badge.up{background:#E8FAF0;color:#1fa855;}
+.price-badge.down{background:#FFF0E8;color:var(--orange);}
+
+/* SELL PANEL */
+#sell-panel{display:none;position:absolute;top:0;left:0;right:0;background:var(--bg);z-index:5;}
+.donut-sel-header{background:#fff;margin:12px 14px 0;border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);}
+.sel-name-row{display:flex;align-items:center;gap:8px;flex:1;}
+.sel-icon{font-size:26px;width:30px;text-align:center;line-height:1;}
+.sel-name{font-weight:800;font-size:14px;}
+.sel-price{display:flex;align-items:center;gap:3px;font-weight:800;font-size:14px;flex-shrink:0;}
+.sel-graph{width:72px;height:36px;flex-shrink:0;}
+.sell-form-card{background:var(--card);border-radius:14px;margin:14px;box-shadow:var(--shadow);overflow:hidden;}
+.sell-row{padding:16px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);}
+.sell-row:last-child{border-bottom:none;}
+.sell-label{font-weight:700;font-size:14px;color:var(--text);}
+.amount-tap{font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;text-align:right;}
+.amount-tap.filled{color:var(--text);}
+.total-coins{display:flex;align-items:center;gap:5px;font-weight:800;font-size:16px;color:var(--yellow-dark);}
+.sell-btn{display:block;margin:14px;width:calc(100% - 28px);background:var(--green);color:#fff;border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;transition:background 0.15s,transform 0.1s;box-shadow:0 4px 12px rgba(45,203,110,0.4);}
+.sell-btn:hover{background:var(--green-dark);}
+.sell-btn:active{transform:scale(0.98);}
+.sell-btn:disabled{background:#ccc;box-shadow:none;cursor:not-allowed;}
+
+/* AMOUNT MODAL — centered overlay inside market-col */
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.58);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity 0.2s;border-radius:24px;}
+.modal-overlay.show{opacity:1;pointer-events:all;}
+.modal-box{background:#fff;border-radius:18px;padding:26px 22px 22px;width:88%;max-width:320px;transform:scale(0.88);transition:transform 0.22s ease;box-shadow:0 20px 60px rgba(0,0,0,0.28);}
+.modal-overlay.show .modal-box{transform:scale(1);}
+.modal-title{font-weight:800;font-size:15px;margin-bottom:14px;text-align:center;color:var(--text);}
+.modal-input{width:100%;border:2px solid var(--border);border-radius:11px;padding:13px 14px;font-size:20px;font-weight:800;font-family:'Nunito',sans-serif;outline:none;text-align:center;transition:border-color 0.15s;color:var(--text);}
+.modal-input:focus{border-color:var(--green);}
+.modal-hint{text-align:center;font-size:12px;color:var(--muted);margin-top:7px;}
+.modal-btns{display:flex;gap:9px;margin-top:16px;}
+.modal-cancel{flex:1;padding:13px;border-radius:11px;border:1.5px solid var(--border);background:#fff;font-size:14px;font-weight:700;color:var(--text);font-family:'Nunito',sans-serif;cursor:pointer;}
+.modal-confirm{flex:1;padding:13px;border-radius:11px;border:none;background:var(--green);font-size:14px;font-weight:700;color:#fff;font-family:'Nunito',sans-serif;cursor:pointer;}
+
+/* ── DEBUG COLUMN ── */
+#debug-col{
+  background:var(--bg);
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,0.12);
+}
+.dbg-header{padding:13px 16px 11px;background:var(--green);border-bottom:none;display:flex;align-items:center;justify-content:space-between;}
+.dbg-close-btn{background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:28px;height:28px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s;}
+.dbg-close-btn:hover{background:rgba(255,255,255,0.4);}
+.dbg-lock{padding:16px;display:flex;flex-direction:column;gap:8px;}
+.dbg-lock-top{display:flex;align-items:center;gap:6px;margin-bottom:2px;}
+.dbg-lock-icon-sm{font-size:16px;line-height:1;}
+.dbg-lock-label{font-size:12px;font-weight:800;color:var(--muted);}
+.dbg-lock-input{width:100%;border:2px solid var(--border);border-radius:10px;padding:9px 12px;font-size:14px;font-family:'Nunito',sans-serif;outline:none;text-align:center;transition:border-color 0.15s;color:var(--text);}
+.dbg-lock-input:focus{border-color:var(--green);}
+.dbg-lock-err{font-size:11px;font-weight:700;color:#E53E3E;min-height:14px;}
+.dbg-lock-btns{display:flex;gap:8px;}
+.dbg-lock-btn{flex:1;padding:10px;background:var(--green);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;transition:background 0.15s;}
+.dbg-lock-btn:hover{background:var(--green-dark);}
+.dbg-reset-lock-btn{flex:1;padding:10px;background:#FFF0F0;border:1.5px solid #FFCCCC;border-radius:10px;color:#E53E3E;font-size:12px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;transition:background 0.15s;}
+.dbg-reset-lock-btn:hover{background:#FFE0E0;}
+.dbg-header-title{font-family:'Fredoka One',sans-serif;font-size:17px;font-weight:400;color:#fff;letter-spacing:0.3px;}
+.dbg-body{padding:12px 12px 16px;display:flex;flex-direction:column;gap:10px;}
+.dbg-card{background:var(--card);border-radius:14px;padding:13px 14px;box-shadow:var(--shadow);}
+.dbg-section-title{font-size:10px;font-weight:800;color:var(--muted);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:8px;}
+.dbg-divider{height:1px;background:var(--border);margin:0 -2px;}
+.dbg-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.dbg-row:last-child{margin-bottom:0;}
+.dbg-label{font-size:11px;color:var(--muted);width:60px;flex-shrink:0;line-height:1.3;font-weight:700;}
+.dbg-slider{flex:1;accent-color:var(--green);cursor:pointer;min-width:0;}
+.dbg-val{font-size:12px;font-weight:800;min-width:42px;text-align:right;}
+.dbg-val.up{color:var(--green-dark);}
+.dbg-val.down{color:var(--orange);}
+.dbg-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.dbg-stat{background:var(--bg);border-radius:9px;padding:9px 10px;border:1px solid var(--border);}
+.dbg-stat-label{font-size:9px;color:var(--muted);font-weight:800;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:3px;}
+.dbg-stat-val{font-size:13px;font-weight:800;color:var(--text);word-break:break-all;}
+.dbg-stat-val.up{color:var(--green-dark);}
+.dbg-stat-val.down{color:var(--orange);}
+.dbg-tick-btn{width:100%;padding:12px;background:var(--green);border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;transition:background 0.15s;box-shadow:0 4px 12px rgba(45,203,110,0.3);}
+.dbg-tick-btn:hover{background:var(--green-dark);}
+.dbg-reset-btn{width:100%;padding:12px;background:#fff;border:1.5px solid var(--border);border-radius:12px;color:var(--muted);font-size:13px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;transition:background 0.15s,color 0.15s;margin-top:6px;}
+.dbg-reset-btn:hover{background:#fff0f0;color:var(--red);border-color:#ffcccc;}
+.trend-row{display:flex;align-items:flex-start;gap:6px;padding:7px 0;border-bottom:1px solid var(--border);}
+.trend-row:last-child{border-bottom:none;}
+.trend-icon{font-size:18px;width:22px;text-align:center;flex-shrink:0;line-height:1;margin-top:1px;}
+.trend-info{flex:1;min-width:0;}
+.trend-name{font-size:11px;color:var(--muted);margin-bottom:2px;font-weight:700;}
+.trend-streak{font-size:10px;color:var(--muted);}
+.trend-right{display:flex;flex-direction:column;align-items:flex-end;gap:1px;flex-shrink:0;}
+.trend-price{font-size:13px;font-weight:800;color:var(--text);}
+.trend-pct{font-size:10px;font-weight:700;}
+.trend-pct.up{color:var(--green-dark);}
+.trend-pct.down{color:var(--orange);}
+/* inv editor inside debug */
+.inv-edit-row{display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid var(--border);}
+.inv-edit-row:last-child{border-bottom:none;}
+.inv-edit-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0;line-height:1;}
+.inv-edit-name{font-size:11px;color:var(--muted);flex:1;min-width:0;font-weight:700;}
+.inv-edit-btn{background:var(--bg);border:1.5px solid var(--border);border-radius:6px;width:24px;height:24px;color:var(--text);font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;}
+.inv-edit-btn:hover{background:var(--border);}
+.inv-edit-val{font-size:12px;font-weight:800;color:var(--text);min-width:44px;text-align:center;}
+.inv-edit-input{background:#f0f4ff;border:1.5px solid #d0d8f0;border-radius:6px;color:#1A1A2E;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;width:52px;text-align:center;padding:3px 4px;outline:none;}
+.inv-edit-input:focus{border-color:#2DCB6E;}
+.sel-back-arrow{font-size:28px;color:var(--muted);font-weight:400;flex-shrink:0;padding-right:2px;transition:color 0.15s;line-height:1;}
+.donut-sel-header:hover .sel-back-arrow{color:var(--text);}
+
+/* SHOP COLUMN */
+#shop-col{
+  width:100%;
+  background:var(--bg);
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,0.12);
+}
+.shop-col-header{background:var(--green);padding:13px 16px 11px;}
+.shop-col-title{font-family:'Fredoka One',sans-serif;font-size:17px;color:#fff;}
+#shop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px;}
+.shop-cell{background:var(--card);border-radius:14px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;box-shadow:var(--shadow);transition:transform 0.15s,box-shadow 0.15s;position:relative;}
+.shop-cell:hover:not(.sold){transform:translateY(-2px);box-shadow:var(--shadow-md);}
+.shop-cell:active:not(.sold){transform:scale(0.98);}
+.shop-cell.sold{cursor:default;background:#fafafa;}
+.shop-item-emoji{font-size:26px;line-height:1;}
+.shop-item-name{font-size:10px;font-weight:800;color:var(--text);text-align:center;line-height:1.2;}
+.shop-item-price{display:flex;align-items:center;gap:2px;font-size:10px;font-weight:800;color:var(--yellow-dark);}
+.shop-sold-badge{position:absolute;inset:0;background:rgba(255,255,255,0.82);display:flex;align-items:center;justify-content:center;border-radius:14px;}
+.shop-sold-text{font-size:11px;font-weight:800;color:var(--muted);}
+/* AMOUNT CONTROLS */
+.amount-controls{display:flex;align-items:center;gap:6px;}
+.amt-btn{background:#1A1A2E;color:#fff;border:none;border-radius:10px;width:34px;height:34px;font-size:18px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s,transform 0.1s;flex-shrink:0;}
+.amt-btn:hover{background:#333355;}
+.amt-btn:active{transform:scale(0.92);}
+.amt-max{width:auto;padding:0 10px;font-size:12px;letter-spacing:0.5px;}
+.amt-num{font-size:20px;font-weight:800;color:var(--text);min-width:50px;text-align:center;cursor:pointer;}
+.sell-inv-hint{font-size:11px;color:var(--muted);font-weight:700;}
+/* inventory dim */
+.inv-row{transition:opacity 0.25s;}
+.inv-row.dimmed{opacity:0.35;}
+
+/* LEADERBOARD */
+#lb-col{width:100%;display:flex;flex-direction:column;gap:12px;}
+#lb-nick-card,#lb-coins-card,#lb-price-card{
+  background:var(--card);border-radius:20px;overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,0.12);
+}
+.lb-section-header{
+  background:var(--green);padding:13px 16px 11px;
+  display:flex;align-items:center;gap:8px;
+}
+.lb-section-icon{font-size:16px;line-height:1;}
+.lb-section-title{font-family:'Fredoka One',sans-serif;font-size:17px;color:#fff;}
+.lb-nick-row{display:flex;gap:8px;padding:14px 14px 8px;}
+.lb-nick-input{
+  flex:1;border:2px solid var(--border);border-radius:10px;
+  padding:9px 12px;font-size:14px;font-weight:700;
+  font-family:'Nunito',sans-serif;outline:none;color:var(--text);
+  transition:border-color 0.15s;
+}
+.lb-nick-input:focus{border-color:var(--green);}
+.lb-nick-btn{
+  background:var(--green);color:#fff;border:none;border-radius:10px;
+  padding:9px 14px;font-size:13px;font-weight:800;
+  font-family:'Nunito',sans-serif;cursor:pointer;flex-shrink:0;
+  transition:background 0.15s;
+}
+.lb-nick-btn:hover{background:var(--green-dark);}
+.lb-my-info{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 14px 14px;
+}
+.lb-my-name{font-size:15px;font-weight:800;color:var(--text);}
+.lb-my-stats{display:flex;align-items:center;gap:4px;}
+.lb-my-stat{display:flex;align-items:center;gap:4px;font-size:14px;font-weight:800;color:var(--yellow-dark);}
+/* rank rows */
+.lb-rank-row{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 16px;border-bottom:1px solid var(--border);
+}
+.lb-rank-row:last-child{border-bottom:none;}
+.lb-rank-num{
+  width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:800;flex-shrink:0;
+}
+.lb-rank-num.r1{background:#FFD700;color:#7a5800;}
+.lb-rank-num.r2{background:#C0C0C0;color:#555;}
+.lb-rank-num.r3{background:#CD7F32;color:#fff;}
+.lb-rank-num.rn{background:var(--border);color:var(--muted);}
+.lb-rank-name{flex:1;font-size:13px;font-weight:700;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lb-rank-name.me{color:var(--green-dark);}
+.lb-rank-val{font-size:13px;font-weight:800;color:var(--text);flex-shrink:0;}
+.lb-rank-val.coins{color:var(--yellow-dark);}
+.lb-rank-val.up{color:var(--green-dark);}
+.lb-rank-val.down{color:var(--orange);}
+.lb-rank-sub{font-size:10px;color:var(--muted);font-weight:700;flex-shrink:0;}
+.lb-empty{padding:20px;text-align:center;font-size:13px;color:var(--muted);font-weight:700;}
+/* rank row donut icon */
+.lb-rank-emoji{font-size:16px;flex-shrink:0;line-height:1;}
+
+/* AD COUNT BAR */
+#ad-count-bar{
+  display:flex;align-items:center;gap:6px;
+  padding:12px 18px;
+  background:var(--card);
+  border-radius:20px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.12);
+}
+#ad-count-icon{font-size:14px;line-height:1;}
+#ad-count-label{font-size:11px;font-weight:700;color:var(--muted);flex:1;}
+#ad-count-num{font-size:15px;font-weight:800;color:var(--green-dark);}
+
+/* SHOP PURCHASE ANIMATION */
+@keyframes stamp-in{
+  0%{transform:scale(2.5) rotate(-15deg);opacity:0;}
+  60%{transform:scale(0.9) rotate(3deg);opacity:1;}
+  80%{transform:scale(1.1) rotate(-2deg);}
+  100%{transform:scale(1) rotate(0deg);opacity:1;}
+}
+@keyframes sold-badge-in{
+  0%{opacity:0;transform:scale(1.3);}
+  60%{transform:scale(0.95);}
+  100%{opacity:1;transform:scale(1);}
+}
+@keyframes sparkle{
+  0%{opacity:1;transform:translate(0,0) scale(1);}
+  100%{opacity:0;transform:translate(var(--sx),var(--sy)) scale(0);}
+}
+.shop-cell.buying .shop-item-emoji{animation:stamp-in 0.5s cubic-bezier(.36,.07,.19,.97) forwards;}
+.shop-sold-badge{animation:sold-badge-in 0.35s ease forwards;}
+.sparkle-particle{position:fixed;z-index:9999;pointer-events:none;font-size:16px;animation:sparkle 0.7s ease-out forwards;}
+
+/* char-zone item badges */
+.char-item{position:absolute;font-size:18px;line-height:1;animation:bob 2s ease-in-out infinite;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.15));}
+
+/* COIN EFFECT */
+.coin-particle{position:fixed;z-index:9999;font-size:18px;pointer-events:none;animation:fly-coin 0.9s ease-in forwards;}
+@keyframes fly-coin{0%{opacity:1;transform:translate(0,0) scale(1);}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0.3);}}
+
+/* TOAST */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:#1A1A2E;color:#fff;padding:10px 18px;border-radius:50px;font-size:13px;font-weight:700;z-index:9998;transition:transform 0.3s ease;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* responsive: stack on narrow screens */
+@media(max-width:900px){
+  body{padding:0;}
+  #layout{flex-direction:column;gap:0;}
+  #left-col{width:100%;}
+  #market-col{border-radius:0;}
+  #shop-col{border-radius:0;}
+  #debug-col{border-radius:0;}
+}
+</style>
+</head>
+<body>
+<div id="layout">
+
+<!-- ══ LEFT COLUMN ══ -->
+<div id="left-col">
+
+<!-- ══ MARKET COLUMN ══ -->
+<div id="market-col">
+
+  <!-- CHARACTER ZONE -->
+  <div class="char-zone">
+    <div class="coin-display">
+      <span id="coin-icon-disp" style="font-size:15px;line-height:1;display:flex;align-items:center;"></span>
+      <span id="coin-count">0</span>
+    </div>
+    <div class="inventory-panel">
+      <div class="inv-row"><span id="inv-icon-0" style="line-height:1;display:flex;align-items:center;font-size:13px;"></span><span id="inv-0">223</span></div>
+      <div class="inv-row"><span id="inv-icon-1" style="line-height:1;display:flex;align-items:center;font-size:13px;"></span><span id="inv-1">4K</span></div>
+      <div class="inv-row"><span id="inv-icon-2" style="line-height:1;display:flex;align-items:center;font-size:13px;"></span><span id="inv-2">10.3K</span></div>
+      <div class="inv-row"><span id="inv-icon-3" style="line-height:1;display:flex;align-items:center;font-size:13px;"></span><span id="inv-3">0</span></div>
+    </div>
+    <div class="character" id="char-el"></div>
+    <div class="char-item" id="ci-0" style="left:18px;top:60px;display:none;animation-delay:0s;"></div>
+    <div class="char-item" id="ci-1" style="right:80px;top:55px;display:none;animation-delay:0.3s;"></div>
+    <div class="char-item" id="ci-2" style="left:50px;top:110px;display:none;animation-delay:0.6s;"></div>
+    <div class="char-item" id="ci-3" style="right:50px;top:105px;display:none;animation-delay:0.9s;"></div>
+    <div class="char-item" id="ci-4" style="left:22px;top:148px;display:none;animation-delay:1.2s;"></div>
+    <div class="char-item" id="ci-5" style="right:22px;top:148px;display:none;animation-delay:1.5s;"></div>
+  </div>
+
+  <!-- HOME PANEL -->
+  <!-- SHARED HEADER (always visible) -->
+  <div class="market-header">
+    <span class="market-title" id="market-title-home"></span>
+  </div>
+  <div class="timer-bar">
+    <span class="timer-label">Price Update in <span class="timer-val" id="timer-val">03:00</span></span>
+    <button class="ad-btn" id="ad-btn" onclick="watchAd()">광고 보고 갱신!</button>
+  </div>
+
+  <!-- CONTENT AREA: home and sell swap here -->
+  <div id="content-area" style="position:relative;">
+    <div id="home-panel">
+      <div class="donut-list" id="donut-list"></div>
+    </div>
+
+  <!-- SELL PANEL -->
+  <div id="sell-panel">
+    <div class="donut-sel-header" onclick="goHome()" style="cursor:pointer;" title="목록으로 돌아가기">
+      <div class="sel-back-arrow">&#8249;</div>
+      <div class="sel-name-row">
+        <span class="sel-icon" id="sel-icon"></span>
+        <span class="sel-name" id="sel-name">Raspberry Donut</span>
+      </div>
+      <canvas class="sel-graph" id="sel-graph" width="72" height="36"></canvas>
+      <div class="sel-price">
+        <span id="coin-icon-sell" style="font-size:14px;line-height:1;display:flex;align-items:center;"></span>
+        <span id="sel-price">16</span>
+      </div>
+    </div>
+    <div class="sell-form-card">
+      <div class="sell-row">
+        <div style="display:flex;flex-direction:column;gap:2px;">
+          <span class="sell-label">Amount</span>
+          <span class="sell-inv-hint" id="sell-inv-hint"></span>
+        </div>
+        <div class="amount-controls">
+          <button class="amt-btn" id="amt-minus" onclick="adjustAmount(-1)">−</button>
+          <span class="amt-num" id="amt-num" onclick="openModal()">0</span>
+          <button class="amt-btn" id="amt-plus" onclick="adjustAmount(1)">+</button>
+          <button class="amt-btn amt-max" onclick="setAmountMax()">MAX</button>
+        </div>
+      </div>
+      <div class="sell-row">
+        <span class="sell-label">Market Price</span>
+        <div class="total-coins" id="total-coins">
+          <span style="color:var(--muted);font-weight:800;font-size:16px;">0</span>
+        </div>
+      </div>
+    </div>
+    <button class="sell-btn" id="sell-btn" onclick="doSell()" disabled>Sell</button>
+  </div>
+
+  <!-- AMOUNT MODAL — centered inside market-col -->
+  <div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+    <div class="modal-box">
+      <div class="modal-title" id="modal-title">Type Amount (1~0)</div>
+      <input class="modal-input" id="modal-input" type="number" min="1" inputmode="numeric" />
+      <div class="modal-hint" id="modal-hint">보유: 0개</div>
+      <div class="modal-btns">
+        <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+        <button class="modal-confirm" onclick="confirmAmount()">Confirm</button>
+      </div>
+    </div>
+  </div>
+  </div><!-- /#content-area -->
+</div><!-- /#market-col -->
+
+<!-- AD COUNT BAR -->
+<div id="ad-count-bar">
+  <span id="ad-count-icon">🎬</span>
+  <span id="ad-count-label">광고 시청</span>
+  <span id="ad-count-num">0</span>
+  <span style="font-size:11px;color:var(--muted);font-weight:700;">회</span>
+</div>
+
+<!-- ══ SHOP COLUMN ══ -->
+<div id="shop-col">
+  <div class="shop-col-header">
+    <span class="shop-col-title">&#x1F6D2; Shop</span>
+  </div>
+  <div id="shop-grid"></div>
+</div>
+
+
+</div><!-- /#left-col -->
+
+<!-- ══ RIGHT COLUMN ══ -->
+<div id="right-col">
+
+<!-- ══ LEADERBOARD ══ -->
+<div id="lb-col">
+
+  <!-- NICKNAME -->
+  <div id="lb-nick-card">
+    <div class="lb-section-header">
+      <span class="lb-section-icon">&#x1F464;</span>
+      <span class="lb-section-title">내 닉네임</span>
+    </div>
+    <div class="lb-nick-row">
+      <input class="lb-nick-input" id="lb-nick-input" type="text" maxlength="12" placeholder="닉네임 입력...">
+      <button class="lb-nick-btn" onclick="setNickname()">설정</button>
+    </div>
+    <div class="lb-my-info">
+      <span class="lb-my-name" id="lb-my-name"></span>
+      <div class="lb-my-stats">
+        <span class="lb-my-stat"><span id="lb-my-coins-icon"></span><span id="lb-my-coins">0</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- COIN RANKING -->
+  <div id="lb-coins-card">
+    <div class="lb-section-header">
+      <span class="lb-section-icon">&#x1F4B0;</span>
+      <span class="lb-section-title">소지금 순위</span>
+    </div>
+    <div id="lb-coins-list"></div>
+  </div>
+
+  <!-- DONUT PRICE RANKING -->
+  <div id="lb-price-card">
+    <div class="lb-section-header">
+      <span class="lb-section-icon">&#x1F4C8;</span>
+      <span class="lb-section-title">가장 비싸게 판 도넛</span>
+    </div>
+    <div id="lb-price-list"></div>
+  </div>
+
+</div><!-- /#lb-col -->
+
+<!-- ══ DEBUG COLUMN ══ -->
+<div id="debug-col">
+  <div class="dbg-header">
+    <div class="dbg-header-title">🔧 Debug Tool</div>
+    <button class="dbg-close-btn" id="dbg-close-btn" onclick="lockDebug()" style="display:none;">✕</button>
+  </div>
+  <!-- LOCK SCREEN -->
+  <div id="dbg-lock" class="dbg-lock">
+    <div class="dbg-lock-top">
+      <span class="dbg-lock-icon-sm">🔒</span>
+      <span class="dbg-lock-label">비밀번호 입력</span>
+    </div>
+    <input class="dbg-lock-input" id="dbg-pw-input" type="password" placeholder="••••••••••"
+      onkeydown="if(event.key==='Enter')checkDebugPw()">
+    <div class="dbg-lock-err" id="dbg-pw-err"></div>
+    <div class="dbg-lock-btns">
+      <button class="dbg-lock-btn" onclick="checkDebugPw()">확인</button>
+      <button class="dbg-reset-lock-btn" onclick="confirmReset()">🔄 게임 초기화</button>
+    </div>
+  </div>
+  <!-- ACTUAL BODY (hidden until unlocked) -->
+  <div class="dbg-body" id="dbg-body-inner" style="display:none;">
+
+    <!-- 변동폭 설정 -->
+    <div class="dbg-card">
+      <div class="dbg-section-title">상승폭 설정</div>
+      <div class="dbg-row">
+        <span class="dbg-label">최소 상승</span>
+        <input type="range" class="dbg-slider" id="sl-up-min" min="1" max="49" value="1" step="1" oninput="updateCfg()">
+        <span class="dbg-val up" id="dv-up-min">+10%</span>
+      </div>
+      <div class="dbg-row">
+        <span class="dbg-label">최대 상승</span>
+        <input type="range" class="dbg-slider" id="sl-up-max" min="2" max="50" value="25" step="1" oninput="updateCfg()">
+        <span class="dbg-val up" id="dv-up-max">+500%</span>
+      </div>
+      <div class="dbg-divider"></div>
+      <div class="dbg-section-title" style="margin-top:10px;">하락폭 설정</div>
+      <div class="dbg-row">
+        <span class="dbg-label">최소 하락</span>
+        <input type="range" class="dbg-slider" id="sl-dn-min" min="1" max="49" value="1" step="1" oninput="updateCfg()">
+        <span class="dbg-val down" id="dv-dn-min">-10%</span>
+      </div>
+      <div class="dbg-row">
+        <span class="dbg-label">최대 하락</span>
+        <input type="range" class="dbg-slider" id="sl-dn-max" min="1" max="50" value="8" step="1" oninput="updateCfg()">
+        <span class="dbg-val down" id="dv-dn-max">-80%</span>
+      </div>
+    </div>
+
+    <!-- 현재 적용값 -->
+    <div class="dbg-card">
+      <div class="dbg-section-title">현재 적용된 변동폭</div>
+      <div class="dbg-stat-grid">
+        <div class="dbg-stat"><div class="dbg-stat-label">상승 범위</div><div class="dbg-stat-val up" id="cur-up-range">+10~+500%</div></div>
+        <div class="dbg-stat"><div class="dbg-stat-label">하락 범위</div><div class="dbg-stat-val down" id="cur-dn-range">-10~-80%</div></div>
+        <div class="dbg-stat"><div class="dbg-stat-label">마지막 상승</div><div class="dbg-stat-val up" id="last-up-val">—</div></div>
+        <div class="dbg-stat"><div class="dbg-stat-label">마지막 하락</div><div class="dbg-stat-val down" id="last-dn-val">—</div></div>
+      </div>
+    </div>
+
+    <!-- 도넛별 추세 -->
+    <div class="dbg-card">
+      <div class="dbg-section-title">도넛별 추세</div>
+      <div id="trend-table"></div>
+    </div>
+
+    <!-- 보유 코인 + 도넛 수량 -->
+    <div class="dbg-card">
+      <div class="dbg-section-title">보유 코인 조절</div>
+      <div class="dbg-row" style="margin-bottom:0;">
+        <span class="dbg-label" style="width:auto;flex:1;">보유 코인</span>
+        <button class="inv-edit-btn" onclick="adjustCoins(-1000)">−</button>
+        <input class="inv-edit-input" id="coin-inp" type="number" value="0" min="0" oninput="setCoins(this.value)" style="width:80px;">
+        <button class="inv-edit-btn" onclick="adjustCoins(1000)">+</button>
+      </div>
+      <div class="dbg-divider" style="margin:12px 0;"></div>
+      <div class="dbg-section-title">도넛 수량 조절</div>
+      <div id="inv-editor"></div>
+    </div>
+
+    <button class="dbg-tick-btn" onclick="debugTick()">⏩ 지금 시세 갱신</button>
+    <button class="dbg-reset-btn" onclick="debugReset()">↺ 초기화</button>
+
+  </div>
+  </div><!-- /#dbg-body-inner -->
+</div><!-- /#debug-col -->
+
+</div><!-- /#right-col -->
+
+</div><!-- /#layout -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── EMOJI via text node to avoid encoding issues ── */
+const E = {
+  coin:      '💰',
+  glazed:    '🍩',
+  raspberry: '🍓',
+  mango:     '🥭',
+  blueberry: '🍇',
+  rabbit:    '🚚',
+  film:      '🎬',
+  fast:      '⏩',
+};
+
+const DONUTS = [
+  {name:'Glazed Donut',    emoji: E.glazed,    basePrice:10,  inv:200},
+  {name:'Raspberry Donut', emoji: E.raspberry, basePrice:15,  inv:200},
+  {name:'Mango Donut',     emoji: E.mango,     basePrice:20,  inv:200},
+  {name:'Blueberry Donut', emoji: E.blueberry, basePrice:25,  inv:200},
+];
+
+const HISTORY_LEN = 10;
+let coins = 0;
+let selected = 0;
+let amount = 0;
+let timerSec = 180;
+let adCooldown = false;
+let adWatchCount = 0;
+let cfg = {upMin:1, upMax:25, dnMin:1, dnMax:8};
+let lastUpPct = null, lastDnPct = null;
+
+const SHOP_ITEMS = [
+  {id:0, name:'Star Brooch',   emoji:'⭐', price:10000},
+  {id:1, name:'Moon Clip',     emoji:'🌙', price:50000},
+  {id:2, name:'Rainbow Pin',   emoji:'🌈', price:100000},
+  {id:3, name:'Crown',         emoji:'👑', price:500000},
+  {id:4, name:'Diamond',       emoji:'💎', price:1000000},
+  {id:5, name:'Trophy',        emoji:'🏆', price:2000000},
+];
+
+let purchased = [false,false,false,false,false,false];
+/* sellHistory: [{donutIdx, price, pct}] — recorded on each sell */
+let sellHistory = [];
+
+let state = DONUTS.map(d => ({
+  price: d.basePrice,
+  prevPrice: d.basePrice,
+  inv: d.inv,
+  history: Array(HISTORY_LEN).fill(d.basePrice),
+  streak: 0,
+  lastDir: null,
+}));
+
+/* place emoji safely via textContent */
+function setEmoji(el, e){ if(el){ el.textContent=''; el.appendChild(document.createTextNode(e)); } }
+
+function initEmoji(){
+  setEmoji(document.getElementById('coin-icon-disp'), E.coin);
+  setEmoji(document.getElementById('coin-icon-sell'), E.coin);
+  setEmoji(document.getElementById('char-el'), E.rabbit);
+  DONUTS.forEach((d,i)=> setEmoji(document.getElementById('inv-icon-'+i), d.emoji));
+  /* market titles */
+  const th = document.getElementById('market-title-home');
+  if(th){ th.textContent=''; th.appendChild(document.createTextNode(E.glazed+' Donut Market')); }
+  const ab=document.getElementById('ad-btn');
+  if(ab){ ab.textContent='광고 보고 갱신!'; }
+}
+
+/* ── PRICE LOGIC ── */
+function nextPrice(idx){
+  const s = state[idx];
+  let goUp;
+  if(s.lastDir===null){ goUp=Math.random()<0.5; }
+  else {
+    const prob=[0.50,0.35,0.20,0.10][Math.min(s.streak-1,3)];
+    goUp = s.lastDir==='up'? Math.random()<prob : Math.random()>=(1-prob);
+  }
+  /* below-base bonus */
+  const base=DONUTS[idx].basePrice;
+  if(s.price < base){
+    const ratio=(base-s.price)/base;
+    const baseUpChance = goUp
+      ? (s.lastDir===null ? 0.5 : [0.50,0.35,0.20,0.10][Math.min(s.streak-1,3)])
+      : (s.lastDir===null ? 0.5 : 1-[0.50,0.35,0.20,0.10][Math.min(s.streak-1,3)]);
+    const bonus=ratio*0.4;
+    const upChance=Math.min(0.95, baseUpChance+bonus);
+    goUp=Math.random()<upChance;
+  }
+  /* near floor (<=5): override with stronger boost */
+  let revival=false;
+  if(s.price<=5){
+    const boost=1-(s.price-3)/3;
+    const upChance=0.5+boost*0.45;
+    goUp=Math.random()<upChance;
+    if(goUp) revival=true;
+  }
+  /* calculate pct */
+  let pct;
+  if(revival){
+    /* revival bonus: up to 1000% */
+    pct=(Math.floor(Math.random()*100)+1)*10;
+    lastUpPct=pct;
+  } else if(goUp){
+    pct=(Math.floor(Math.random()*(cfg.upMax-cfg.upMin+1))+cfg.upMin)*10;
+    lastUpPct=pct;
+  } else {
+    pct=-((Math.floor(Math.random()*(cfg.dnMax-cfg.dnMin+1))+cfg.dnMin)*10);
+    lastDnPct=Math.abs(pct);
+  }
+  /* ceiling: if result would exceed 100x basePrice, force down instead */
+  const ceiling = 1500;
+  if(goUp && Math.floor(s.price*(1+pct/100)) >= ceiling){
+    goUp=false;
+    pct=-((Math.floor(Math.random()*(cfg.dnMax-cfg.dnMin+1))+cfg.dnMin)*10);
+    lastDnPct=Math.abs(pct);
+  }
+  const rawPrice=Math.floor(s.price*(1+pct/100));
+  const newPrice=Math.max(3,rawPrice);
+  s.prevPrice=s.price;
+  const dir=goUp?'up':'down';
+  s.streak=s.lastDir===dir?s.streak+1:1;
+  s.lastDir=dir;
+  s.history.push(newPrice);
+  if(s.history.length>HISTORY_LEN) s.history.shift();
+  s.price=newPrice;
+}
+
+function tickAll(){
+  for(let i=0;i<DONUTS.length;i++) nextPrice(i);
+  timerSec=300;
+  renderList(); renderDebug(); renderLeaderboard();
+  if(document.getElementById('sell-panel').style.display==='block') renderSell();
+}
+
+/* ── GRAPH ── */
+function drawGraph(canvas, history, lastDir){
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  if(history.length<2) return;
+  const mn=Math.min(...history),mx=Math.max(...history);
+  const flat=mn===mx;
+  const range=flat?mn:mx-mn;
+  /* midline always at vertical center when flat */
+  const midY=H/2;
+  ctx.save();
+  ctx.strokeStyle='#BBBBBB';
+  ctx.lineWidth=1;
+  ctx.setLineDash([3,4]);
+  ctx.beginPath();
+  ctx.moveTo(2,midY);
+  ctx.lineTo(W-2,midY);
+  ctx.stroke();
+  ctx.restore();
+  ctx.beginPath();
+  ctx.strokeStyle=lastDir==='down'?'#FF6B35':'#2DCB6E';
+  ctx.lineWidth=2.2;ctx.lineJoin='round';ctx.lineCap='round';
+  history.forEach((v,i)=>{
+    const x=(i/(history.length-1))*(W-4)+2;
+    const y=flat?H/2:H-2-((v-mn)/range)*(H-4);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+}
+
+function fmt(n){return Math.round(n).toLocaleString('ko-KR');}
+function fmtInv(n){return Math.round(n).toLocaleString('ko-KR');}
+function fmtFull(n){return Math.round(n).toLocaleString('ko-KR');}
+
+/* ── RENDER LIST ── */
+function renderList(){
+  const el=document.getElementById('donut-list');
+  el.innerHTML=DONUTS.map((d,i)=>{
+    const s=state[i];
+    const pct=Math.round((s.price-s.prevPrice)/s.prevPrice*100);
+    const badge=pct>0?`<span class="price-badge up">&#x25B2;${pct}%</span>`:pct<0?`<span class="price-badge down">&#x25BC;${Math.abs(pct)}%</span>`:`<span class="price-badge up">&#x25B2;0%</span>`;
+    return `<div class="donut-card" onclick="selectDonut(${i})">
+      <div class="donut-icon" id="li-icon-${i}" style="font-size:32px;flex-shrink:0;width:38px;text-align:center;line-height:1;"></div>
+      <div class="donut-info">
+        <div class="donut-name">${d.name}</div>
+        <div class="donut-inv">보유: ${fmtFull(s.inv)}개</div>
+        <div>${badge}</div>
+      </div>
+      <canvas class="graph-area" id="graph-${i}" width="72" height="36"></canvas>
+      <div class="price-area">
+        <span id="li-coin-${i}" style="font-size:13px;line-height:1;display:flex;align-items:center;"></span>
+        <span>${fmt(s.price)}</span>
+      </div>
+      <span class="chevron">›</span>
+    </div>`;
+  }).join('');
+  DONUTS.forEach((d,i)=>{
+    setEmoji(document.getElementById(`li-icon-${i}`), d.emoji);
+    setEmoji(document.getElementById(`li-coin-${i}`), E.coin);
+    const c=document.getElementById(`graph-${i}`);
+    if(c) drawGraph(c,state[i].history,state[i].lastDir);
+  });
+  updateInvDisplay();
+}
+
+function updateInvDisplay(){
+  state.forEach((s,i)=>{
+    const el=document.getElementById('inv-'+i);
+    if(el) el.textContent=fmtInv(s.inv);
+    const inp=document.getElementById('inv-inp-'+i);
+    if(inp && document.activeElement!==inp) inp.value=state[i].inv;
+  });
+}
+
+/* ── SELL ── */
+function selectDonut(idx){
+  selected=idx;amount=0;
+  document.getElementById('home-panel').style.visibility='hidden';
+  document.getElementById('sell-panel').style.display='block';
+  dimInventory(idx);
+  renderSell();
+}
+
+function renderSell(){
+  const d=DONUTS[selected],s=state[selected];
+  setEmoji(document.getElementById('sel-icon'), d.emoji);
+  document.getElementById('sel-name').textContent=d.name;
+  document.getElementById('sel-price').textContent=fmt(s.price);
+  drawGraph(document.getElementById('sel-graph'),s.history,s.lastDir);
+  /* hint */
+  const hint=document.getElementById('sell-inv-hint');
+  if(hint) hint.textContent=s.inv>0?`보유 ${fmtFull(s.inv)}개`:'보유 없음';
+  /* amount number */
+  const numEl=document.getElementById('amt-num');
+  if(numEl) numEl.textContent=fmtFull(amount);
+  /* total */
+  const total=amount*s.price;
+  const tc=document.getElementById('total-coins');
+  if(total>0){
+    tc.innerHTML='';
+    const cs=document.createElement('span');cs.style.fontSize='16px';cs.style.lineHeight='1';
+    setEmoji(cs,E.coin);tc.appendChild(cs);
+    const vs=document.createElement('span');vs.textContent=fmtFull(total);tc.appendChild(vs);
+  } else {
+    tc.innerHTML='<span style="color:var(--muted);font-weight:800;font-size:16px;">0</span>';
+  }
+  document.getElementById('sell-btn').disabled=amount<=0||s.inv===0;
+}
+
+function goHome(){
+  document.getElementById('home-panel').style.visibility='visible';
+  document.getElementById('sell-panel').style.display='none';
+  undimInventory();
+}
+
+/* ── MODAL ── */
+function adjustAmount(delta){
+  const s=state[selected];
+  if(s.inv===0) return;
+  let next=amount+delta;
+  if(next<1) next=s.inv;       /* wrap: below 1 → max */
+  if(next>s.inv) next=1;       /* wrap: above max → 1 */
+  amount=next;
+  renderSell();
+}
+
+function setAmountMax(){
+  const s=state[selected];
+  if(s.inv===0) return;
+  amount=s.inv;
+  renderSell();
+}
+
+function dimInventory(selectedIdx){
+  const rows=document.querySelectorAll('.inventory-panel .inv-row');
+  rows.forEach((row,i)=>{
+    if(i===selectedIdx) row.classList.remove('dimmed');
+    else row.classList.add('dimmed');
+  });
+}
+
+function undimInventory(){
+  document.querySelectorAll('.inv-row').forEach(r=>r.classList.remove('dimmed'));
+}
+
+function openModal(){
+  const s=state[selected];
+  if(s.inv===0){showToast('보유한 도넛이 없습니다!');return;}
+  document.getElementById('modal-title').textContent=`Type Amount (1~${fmtFull(s.inv)})`;
+  document.getElementById('modal-hint').textContent=`보유: ${fmtFull(s.inv)}개`;
+  const mi=document.getElementById('modal-input');
+  mi.value='';mi.max=s.inv;mi.min=1;
+  document.getElementById('modal').classList.add('show');
+  setTimeout(()=>mi.focus(),200);
+}
+function closeModalOutside(e){if(e.target===document.getElementById('modal'))closeModal();}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+function confirmAmount(){
+  const mi=document.getElementById('modal-input');
+  const val=parseInt(mi.value)||0;
+  const s=state[selected];
+  if(val<1||val>s.inv){showToast(`1~${fmt(s.inv)} 사이로 입력해주세요`);return;}
+  amount=val;closeModal();renderSell();
+}
+
+/* ── DO SELL ── */
+function doSell(){
+  const s=state[selected];
+  if(amount<=0||s.inv<amount) return;
+  const earned=amount*s.price;
+  s.inv-=amount;coins+=earned;
+  const sellPct=Math.round((s.price-DONUTS[selected].basePrice)/DONUTS[selected].basePrice*100);
+  sellHistory.push({donutIdx:selected,price:s.price,pct:sellPct});
+  document.getElementById('coin-count').textContent=fmt(coins);
+  updateInvDisplay();
+  spawnCoins(earned);
+  showToast(E.coin+' '+fmt(earned)+' 코인 획득!');
+  amount=0;
+  setTimeout(()=>{renderSell();goHome();renderList();renderDebug();renderShop();renderLeaderboard();},900);
+}
+
+function spawnCoins(earned){
+  const btn=document.getElementById('sell-btn');
+  const coinEl=document.querySelector('.coin-display');
+  const br=btn.getBoundingClientRect(),cr=coinEl.getBoundingClientRect();
+  const tx=cr.left+cr.width/2-(br.left+br.width/2);
+  const ty=cr.top-br.top;
+  const count=Math.min(10,Math.max(4,Math.floor(earned/500)));
+  for(let i=0;i<count;i++){
+    setTimeout(()=>{
+      const p=document.createElement('div');
+      p.className='coin-particle';
+      p.appendChild(document.createTextNode(E.coin));
+      const ox=(Math.random()-0.5)*70;
+      p.style.cssText=`left:${br.left+br.width/2+ox}px;top:${br.top}px;--tx:${tx-ox}px;--ty:${ty}px;animation-delay:${Math.random()*0.3}s`;
+      document.body.appendChild(p);
+      setTimeout(()=>p.remove(),1200);
+    },i*65);
+  }
+}
+
+/* ── TOAST ── */
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+/* ── AD ── */
+function watchAd(){
+  tickAll();
+  adWatchCount++;
+  const num=document.getElementById('ad-count-num');
+  if(num) num.textContent=adWatchCount;
+
+}
+
+/* ── TIMER ── */
+function updateTimer(){
+  timerSec--;
+  if(timerSec<=0){tickAll();return;}
+  const m=String(Math.floor(timerSec/60)).padStart(2,'0');
+  const s=String(timerSec%60).padStart(2,'0');
+  const tv=document.getElementById('timer-val');if(tv)tv.textContent=`${m}:${s}`;
+}
+
+/* ── DEBUG ── */
+function confirmReset(){
+  if(confirm('게임을 초기화할까요? (닉네임은 유지됩니다)')){
+    debugReset();
+    showToast('↺ 게임이 초기화되었습니다!');
+  }
+}
+
+function checkDebugPw(){
+  const input=document.getElementById('dbg-pw-input');
+  const err=document.getElementById('dbg-pw-err');
+  if(input.value==='kimmin1124'){
+    document.getElementById('dbg-lock').style.display='none';
+    document.getElementById('dbg-body-inner').style.display='block';
+    document.getElementById('dbg-close-btn').style.display='flex';
+    document.getElementById('right-col').classList.add('debug-open');
+    document.getElementById('layout').classList.add('debug-wide');
+    renderDebug();
+  } else {
+    err.textContent='비밀번호가 틀렸습니다.';
+    input.value='';
+    input.focus();
+    setTimeout(()=>err.textContent='',2000);
+  }
+}
+
+function lockDebug(){
+  document.getElementById('dbg-lock').style.display='flex';
+  document.getElementById('dbg-body-inner').style.display='none';
+  document.getElementById('dbg-close-btn').style.display='none';
+  document.getElementById('dbg-pw-input').value='';
+  document.getElementById('dbg-pw-err').textContent='';
+  document.getElementById('right-col').classList.remove('debug-open');
+  document.getElementById('layout').classList.remove('debug-wide');
+}
+
+function updateCfg(){
+  let uMin=+document.getElementById('sl-up-min').value;
+  let uMax=+document.getElementById('sl-up-max').value;
+  let dMin=+document.getElementById('sl-dn-min').value;
+  let dMax=+document.getElementById('sl-dn-max').value;
+  if(uMin>=uMax){uMax=Math.min(50,uMin+1);document.getElementById('sl-up-max').value=uMax;}
+  if(dMin>=dMax){dMax=Math.min(50,dMin+1);document.getElementById('sl-dn-max').value=dMax;}
+  cfg={upMin:uMin,upMax:uMax,dnMin:dMin,dnMax:dMax};
+  document.getElementById('dv-up-min').textContent=`+${uMin*10}%`;
+  document.getElementById('dv-up-max').textContent=`+${uMax*10}%`;
+  document.getElementById('dv-dn-min').textContent=`-${dMin*10}%`;
+  document.getElementById('dv-dn-max').textContent=`-${dMax*10}%`;
+  document.getElementById('cur-up-range').textContent=`+${uMin*10}~+${uMax*10}%`;
+  document.getElementById('cur-dn-range').textContent=`-${dMin*10}~-${dMax*10}%`;
+}
+
+function renderDebug(){
+  document.getElementById('last-up-val').textContent=lastUpPct!==null?`+${lastUpPct}%`:'—';
+  document.getElementById('last-dn-val').textContent=lastDnPct!==null?`-${lastDnPct}%`:'—';
+
+  /* trend table */
+  const tt=document.getElementById('trend-table');
+  tt.innerHTML='';
+  DONUTS.forEach((d,i)=>{
+    const s=state[i];
+    const dir=s.lastDir;
+    const pct=Math.round((s.price-d.basePrice)/d.basePrice*100);
+    const pctTxt=pct>0?`+${pct}%`:pct<0?`${pct}%`:'0%';
+    const pctCls=pct>0?'up':pct<0?'down':'';
+    const contProb=s.streak>=4?10:s.streak===3?20:s.streak===2?35:50;
+    const arrow=dir==='up'?'▲':dir==='down'?'▼':'·';
+    const streakTxt=dir?`${arrow}${s.streak}연속 · 지속 ${contProb}%`:'시작 전';
+    const row=document.createElement('div');row.className='trend-row';
+    row.innerHTML=`<span class="trend-icon"></span>
+      <div class="trend-info">
+        <div class="trend-name">${d.name}</div>
+        <div class="trend-streak">${streakTxt}</div>
+      </div>
+      <div class="trend-right">
+        <span class="trend-price">${fmt(s.price)}</span>
+        <span class="trend-pct ${pctCls}">${pctTxt}</span>
+      </div>`;
+    setEmoji(row.querySelector('.trend-icon'), d.emoji);
+    tt.appendChild(row);
+  });
+
+  /* inv editor */
+  renderInvEditor();
+
+}
+
+function renderInvEditor(){
+  const ed=document.getElementById('inv-editor');
+  ed.innerHTML='';
+  DONUTS.forEach((d,i)=>{
+    const s=state[i];
+    const row=document.createElement('div');row.className='inv-edit-row';
+    row.innerHTML=`
+      <span class="inv-edit-icon"></span>
+      <span class="inv-edit-name">${d.name}</span>
+      <button class="inv-edit-btn" onclick="adjustInv(${i},-100)" title="-100">−</button>
+      <input class="inv-edit-input" id="inv-inp-${i}" type="number" value="${s.inv}" min="0" oninput="setInv(${i},this.value)" />
+      <button class="inv-edit-btn" onclick="adjustInv(${i},100)" title="+100">+</button>`;
+    setEmoji(row.querySelector('.inv-edit-icon'), d.emoji);
+    ed.appendChild(row);
+  });
+}
+
+function adjustInv(idx, delta){
+  state[idx].inv=Math.max(0,state[idx].inv+delta);
+  const inp=document.getElementById('inv-inp-'+idx);
+  if(inp) inp.value=state[idx].inv;
+  updateInvDisplay();
+  if(document.getElementById('sell-panel').style.display==='block'&&selected===idx) renderSell();
+  renderList();
+}
+
+function setInv(idx, val){
+  state[idx].inv=Math.max(0,parseInt(val)||0);
+  const inp=document.getElementById('inv-inp-'+idx);
+  if(inp) inp.value=state[idx].inv;
+  updateInvDisplay();
+  if(document.getElementById('sell-panel').style.display==='block'&&selected===idx) renderSell();
+  renderList();
+}
+
+function adjustCoins(delta){
+  coins=Math.max(0,coins+delta);
+  document.getElementById('coin-count').textContent=fmt(coins);
+  const inp=document.getElementById('coin-inp');
+  if(inp && document.activeElement!==inp) inp.value=coins;
+  renderShop();renderLeaderboard();
+}
+
+function setCoins(val){
+  coins=Math.max(0,parseInt(val)||0);
+  document.getElementById('coin-count').textContent=fmt(coins);
+  renderShop();renderLeaderboard();
+}
+
+function debugTick(){tickAll();showToast(E.fast+' 강제 시세 갱신!');}
+
+function debugReset(){
+  coins=0;
+  document.getElementById('coin-count').textContent=fmt(coins);
+  const ci=document.getElementById('coin-inp');
+  if(ci) ci.value=0;
+  state=DONUTS.map(d=>({
+    price:d.basePrice,
+    prevPrice:d.basePrice,
+    inv:200,
+    history:Array(HISTORY_LEN).fill(d.basePrice),
+    streak:0,
+    lastDir:null,
+  }));
+  lastUpPct=null;lastDnPct=null;
+  timerSec=180;
+  amount=0;
+  purchased=[false,false,false,false,false,false];
+  adWatchCount=0;
+  sellHistory=[];
+  const adNum=document.getElementById('ad-count-num');
+  if(adNum) adNum.textContent=0;
+  updateCharItems();
+  goHome();
+  renderList();
+  updateInvDisplay();
+  renderDebug();
+  renderShop();renderLeaderboard();
+  /* cfg and sliders are intentionally preserved */
+  showToast('↺ 초기화 완료! (변동폭 설정 유지)');
+}
+
+/* ── SHOP ── */
+function renderShop(){
+  const grid=document.getElementById('shop-grid');
+  if(!grid) return;
+  grid.innerHTML='';
+  SHOP_ITEMS.forEach((item,i)=>{
+    const cell=document.createElement('div');
+    cell.className='shop-cell'+(purchased[i]?' sold':'');
+    const emojiEl=document.createElement('div');
+    emojiEl.className='shop-item-emoji';
+    emojiEl.appendChild(document.createTextNode(item.emoji));
+    const nameEl=document.createElement('div');
+    nameEl.className='shop-item-name';
+    nameEl.textContent=item.name;
+    const priceEl=document.createElement('div');
+    priceEl.className='shop-item-price';
+    const ci=document.createElement('span');ci.style.fontSize='11px';
+    setEmoji(ci,E.coin);
+    priceEl.appendChild(ci);
+    const priceNum=document.createTextNode(fmt(item.price));
+    priceEl.appendChild(priceNum);
+    if(!purchased[i]){
+      if(coins>=item.price) priceEl.style.color='#1fa855';
+      else priceEl.style.color='#E53E3E';
+    }
+    cell.appendChild(emojiEl);
+    cell.appendChild(nameEl);
+    cell.appendChild(priceEl);
+    if(purchased[i]){
+      const badge=document.createElement('div');
+      badge.className='shop-sold-badge';
+      const txt=document.createElement('span');
+      txt.className='shop-sold-text';
+      txt.textContent='품절';
+      badge.appendChild(txt);
+      cell.appendChild(badge);
+    } else {
+      cell.onclick=()=>buyItem(i);
+    }
+    grid.appendChild(cell);
+  });
+}
+
+function buyItem(i){
+  const item=SHOP_ITEMS[i];
+  if(purchased[i]) return;
+  if(coins<item.price){return;}
+  coins-=item.price;
+  purchased[i]=true;
+  document.getElementById('coin-count').textContent=fmt(coins);
+  const ci=document.getElementById('coin-inp');
+  if(ci&&document.activeElement!==ci) ci.value=coins;
+
+  /* sparkle burst from shop cell */
+  const cells=document.getElementById('shop-grid').querySelectorAll('.shop-cell');
+  const cellEl=cells[i];
+  if(cellEl){
+    cellEl.classList.add('buying');
+    const br=cellEl.getBoundingClientRect();
+    const cx=br.left+br.width/2, cy=br.top+br.height/2;
+    for(let k=0;k<10;k++){
+      setTimeout(()=>{
+        const p=document.createElement('div');
+        p.className='sparkle-particle';
+        p.appendChild(document.createTextNode(item.emoji));
+        const angle=Math.random()*Math.PI*2;
+        const dist=40+Math.random()*60;
+        p.style.cssText=`left:${cx}px;top:${cy}px;--sx:${Math.cos(angle)*dist}px;--sy:${Math.sin(angle)*dist}px;animation-delay:${Math.random()*0.15}s;`;
+        document.body.appendChild(p);
+        setTimeout(()=>p.remove(),900);
+      },k*20);
+    }
+    setTimeout(()=>cellEl.classList.remove('buying'),600);
+  }
+
+  /* show in char-zone with bounce */
+  const badge=document.getElementById('ci-'+i);
+  if(badge){
+    badge.textContent='';
+    badge.appendChild(document.createTextNode(item.emoji));
+    badge.style.display='block';
+    badge.style.animation='none';
+    requestAnimationFrame(()=>{
+      badge.style.animation='';
+    });
+  }
+  setTimeout(()=>{renderShop();renderLeaderboard();},400);
+  showToast(item.emoji+' '+item.name+' 구매 완료!');
+}
+
+function updateCharItems(){
+  SHOP_ITEMS.forEach((item,i)=>{
+    const badge=document.getElementById('ci-'+i);
+    if(!badge) return;
+    if(purchased[i]){
+      badge.textContent='';
+      badge.appendChild(document.createTextNode(item.emoji));
+      badge.style.display='block';
+    } else {
+      badge.style.display='none';
+    }
+  });
+}
+
+/* ── LEADERBOARD ── */
+const ADJECTIVES=['빠른','느린','귀여운','무서운','달콤한','신비한','행복한','졸린','배고픈','용감한'];
+const NOUNS=['토끼','고양이','강아지','여우','곰','다람쥐','펭귄','부엉이','너구리','햄스터'];
+function randomNickname(){
+  const a=ADJECTIVES[Math.floor(Math.random()*ADJECTIVES.length)];
+  const n=NOUNS[Math.floor(Math.random()*NOUNS.length)];
+  const num=Math.floor(Math.random()*99)+1;
+  return a+n+num;
+}
+
+let myNickname = randomNickname();
+
+/* fake players for demo */
+const FAKE_PLAYERS = [
+  {name:'달콤한곰33',   coins:128500, donutPrices:[22,18,35,28]},
+  {name:'빠른여우07',   coins:74200,  donutPrices:[11,31,20,19]},
+  {name:'졸린펭귄55',   coins:310000, donutPrices:[10,15,45,25]},
+  {name:'용감한토끼12', coins:52000,  donutPrices:[18,16,22,30]},
+  {name:'신비한너구리8', coins:980000, donutPrices:[10,15,20,80]},
+  {name:'행복한햄스터2', coins:2100,   donutPrices:[10,15,20,25]},
+];
+
+function setNickname(){
+  const input=document.getElementById('lb-nick-input');
+  const val=input.value.trim();
+  if(val.length>0){
+    myNickname=val;
+    input.value='';
+  }
+  renderLeaderboard();
+  showToast('닉네임이 설정되었습니다: '+myNickname);
+}
+
+function myBadges(){
+  return SHOP_ITEMS.filter((_,i)=>purchased[i]).map(item=>item.emoji).join('');
+}
+
+function renderLeaderboard(){
+  /* update my info */
+  const nameEl=document.getElementById('lb-my-name');
+  if(nameEl) nameEl.textContent=myNickname+myBadges();
+  const coinsEl=document.getElementById('lb-my-coins');
+  if(coinsEl) coinsEl.textContent=fmt(coins);
+  const iconEl=document.getElementById('lb-my-coins-icon');
+  if(iconEl){ iconEl.textContent=''; iconEl.appendChild(document.createTextNode(E.coin)); }
+
+  /* ── helper: build name with badges ── */
+  function nameWithBadge(p){
+    return p.isMe ? myNickname+myBadges() : p.name;
+  }
+
+  /* ── coin ranking ── */
+  const allPlayers=[
+    {name:myNickname, coins:coins, isMe:true},
+    ...FAKE_PLAYERS.map(p=>({name:p.name,coins:p.coins,isMe:false}))
+  ];
+  allPlayers.sort((a,b)=>b.coins-a.coins);
+  const top5coins=allPlayers.slice(0,5);
+  const coinsList=document.getElementById('lb-coins-list');
+  if(coinsList){
+    coinsList.innerHTML='';
+    top5coins.forEach((p,i)=>{
+      const row=document.createElement('div');
+      row.className='lb-rank-row';
+      const numCls=i===0?'r1':i===1?'r2':i===2?'r3':'rn';
+      const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':String(i+1);
+      const nameCls=p.isMe?'lb-rank-name me':'lb-rank-name';
+      row.innerHTML=`
+        <div class="lb-rank-num ${numCls}">${medal}</div>
+        <span class="${nameCls}">${nameWithBadge(p)}</span>
+        <span class="lb-rank-val coins">${fmt(p.coins)}</span>`;
+      coinsList.appendChild(row);
+    });
+  }
+
+  /* ── donut price ranking (only from sellHistory) ── */
+  const priceList=document.getElementById('lb-price-list');
+  if(priceList){
+    priceList.innerHTML='';
+    /* build entries from fake players + my sell history */
+    const entries=[];
+    FAKE_PLAYERS.forEach(p=>{
+      p.donutPrices.forEach((price,di)=>{
+        const d=DONUTS[di];
+        const pct=Math.round((price-d.basePrice)/d.basePrice*100);
+        entries.push({name:p.name,isMe:false,donutIdx:di,price,pct});
+      });
+    });
+    sellHistory.forEach(s=>{
+      entries.push({name:myNickname,isMe:true,donutIdx:s.donutIdx,price:s.price,pct:s.pct});
+    });
+    if(entries.length===0){
+      priceList.innerHTML='<div class="lb-empty">판매 후 기록이 표시됩니다</div>';
+      return;
+    }
+    entries.sort((a,b)=>b.price-a.price);
+    const top5=entries.slice(0,5);
+    top5.forEach((e,i)=>{
+      const row=document.createElement('div');
+      row.className='lb-rank-row';
+      const numCls=i===0?'r1':i===1?'r2':i===2?'r3':'rn';
+      const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':String(i+1);
+      const nameCls=e.isMe?'lb-rank-name me':'lb-rank-name';
+      const d=DONUTS[e.donutIdx];
+      const pctCls=e.pct>=0?'up':'down';
+      const pctTxt=e.pct>=0?`▲${e.pct}%`:`▼${Math.abs(e.pct)}%`;
+      const numDiv=document.createElement('div');
+      numDiv.className=`lb-rank-num ${numCls}`;
+      numDiv.textContent=medal;
+      row.appendChild(numDiv);
+      const nameSpan=document.createElement('span');
+      nameSpan.className=nameCls;
+      nameSpan.textContent=e.isMe?myNickname+myBadges():e.name;
+      row.appendChild(nameSpan);
+      const iconSpan=document.createElement('span');
+      iconSpan.className='lb-rank-emoji';
+      iconSpan.appendChild(document.createTextNode(d.emoji));
+      row.appendChild(iconSpan);
+      const valSpan=document.createElement('span');
+      valSpan.className='lb-rank-val';
+      valSpan.textContent=fmt(e.price);
+      row.appendChild(valSpan);
+      const subSpan=document.createElement('span');
+      subSpan.className=`lb-rank-sub ${pctCls}`;
+      subSpan.textContent=pctTxt;
+      row.appendChild(subSpan);
+      priceList.appendChild(row);
+    });
+  }
+}
+
+/* ── INIT ── */
+initEmoji();
+renderList();
+updateCfg();
+renderDebug();
+renderShop();
+renderLeaderboard();
+const _ci=document.getElementById('coin-inp');
+if(_ci) _ci.value=coins;
+setInterval(updateTimer,1000);
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCi9edQ-TT2GxqXj-WA-lv_rIWFhbHpvmo",
+  authDomain: "donutmarket-1d4db.firebaseapp.com",
+  databaseURL: "https://donutmarket-1d4db-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "donutmarket-1d4db",
+  storageBucket: "donutmarket-1d4db.firebasestorage.app",
+  messagingSenderId: "933378673483",
+  appId: "1:933378673483:web:d455e1f37fc6f3193936ce",
+  measurementId: "G-2W5LBQSRVR"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+/* ── unique player ID stored in sessionStorage ── */
+let playerId = sessionStorage.getItem('donut_pid');
+if(!playerId){
+  playerId = 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  sessionStorage.setItem('donut_pid', playerId);
+}
+
+/* ── push my data to Firebase ── */
+function pushMyData(){
+  const bestSell = sellHistory.length > 0
+    ? sellHistory.reduce((a,b)=>a.price>b.price?a:b)
+    : null;
+  set(ref(db, 'players/' + playerId), {
+    nickname: myNickname,
+    badges: SHOP_ITEMS.filter((_,i)=>purchased[i]).map(item=>item.emoji).join(''),
+    coins: coins,
+    bestSell: bestSell ? {
+      donutIdx: bestSell.donutIdx,
+      price: bestSell.price,
+      pct: bestSell.pct
+    } : null,
+    updatedAt: Date.now()
+  });
+}
+
+/* ── listen to all players ── */
+let remotePlayers = {};
+
+onValue(ref(db, 'players'), (snapshot)=>{
+  remotePlayers = {};
+  snapshot.forEach(child=>{
+    if(child.key !== playerId){
+      remotePlayers[child.key] = child.val();
+    }
+  });
+  renderLeaderboardOnline();
+});
+
+/* ── online leaderboard render ── */
+window.renderLeaderboardOnline = function(){
+  /* my info bar */
+  const nameEl=document.getElementById('lb-my-name');
+  if(nameEl) nameEl.textContent = myNickname + myBadges();
+  const coinsEl=document.getElementById('lb-my-coins');
+  if(coinsEl) coinsEl.textContent = fmt(coins);
+  const iconEl=document.getElementById('lb-my-coins-icon');
+  if(iconEl){ iconEl.textContent=''; iconEl.appendChild(document.createTextNode(E.coin)); }
+
+  function myBadgesLocal(){
+    return SHOP_ITEMS.filter((_,i)=>purchased[i]).map(item=>item.emoji).join('');
+  }
+
+  /* ── coin ranking ── */
+  const coinEntries = [
+    { nickname: myNickname + myBadgesLocal(), coins: coins, isMe: true }
+  ];
+  Object.values(remotePlayers).forEach(p=>{
+    coinEntries.push({ nickname: (p.nickname||'?') + (p.badges||''), coins: p.coins||0, isMe: false });
+  });
+  coinEntries.sort((a,b)=>b.coins-a.coins);
+  const top5c = coinEntries.slice(0,5);
+  const coinsList = document.getElementById('lb-coins-list');
+  if(coinsList){
+    coinsList.innerHTML='';
+    top5c.forEach((p,i)=>{
+      const row=document.createElement('div');
+      row.className='lb-rank-row';
+      const numCls=i===0?'r1':i===1?'r2':i===2?'r3':'rn';
+      const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':String(i+1);
+      const nameCls=p.isMe?'lb-rank-name me':'lb-rank-name';
+      row.innerHTML=`<div class="lb-rank-num ${numCls}">${medal}</div>
+        <span class="${nameCls}">${p.nickname}</span>
+        <span class="lb-rank-val coins">${fmt(p.coins)}</span>`;
+      coinsList.appendChild(row);
+    });
+  }
+
+  /* ── best sell ranking ── */
+  const sellEntries = [];
+  /* my best */
+  if(sellHistory.length>0){
+    const best = sellHistory.reduce((a,b)=>a.price>b.price?a:b);
+    sellEntries.push({ nickname: myNickname+myBadgesLocal(), isMe:true,
+      donutIdx:best.donutIdx, price:best.price, pct:best.pct });
+  }
+  /* others' best */
+  Object.values(remotePlayers).forEach(p=>{
+    if(p.bestSell){
+      sellEntries.push({ nickname:(p.nickname||'?')+(p.badges||''), isMe:false,
+        donutIdx:p.bestSell.donutIdx, price:p.bestSell.price, pct:p.bestSell.pct });
+    }
+  });
+  sellEntries.sort((a,b)=>b.price-a.price);
+  const top5s = sellEntries.slice(0,5);
+  const priceList = document.getElementById('lb-price-list');
+  if(priceList){
+    priceList.innerHTML='';
+    if(top5s.length===0){
+      priceList.innerHTML='<div class="lb-empty">판매 후 기록이 표시됩니다</div>';
+      return;
+    }
+    top5s.forEach((e,i)=>{
+      const row=document.createElement('div');
+      row.className='lb-rank-row';
+      const numCls=i===0?'r1':i===1?'r2':i===2?'r3':'rn';
+      const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':String(i+1);
+      const nameCls=e.isMe?'lb-rank-name me':'lb-rank-name';
+      const d=DONUTS[e.donutIdx];
+      const pctCls=e.pct>=0?'up':'down';
+      const pctTxt=e.pct>=0?`▲${e.pct}%`:`▼${Math.abs(e.pct)}%`;
+      const numDiv=document.createElement('div');
+      numDiv.className=`lb-rank-num ${numCls}`;
+      numDiv.textContent=medal;
+      row.appendChild(numDiv);
+      const nameSpan=document.createElement('span');
+      nameSpan.className=nameCls;
+      nameSpan.textContent=e.nickname;
+      row.appendChild(nameSpan);
+      const iconSpan=document.createElement('span');
+      iconSpan.className='lb-rank-emoji';
+      iconSpan.appendChild(document.createTextNode(d.emoji));
+      row.appendChild(iconSpan);
+      const valSpan=document.createElement('span');
+      valSpan.className='lb-rank-val';
+      valSpan.textContent=fmt(e.price);
+      row.appendChild(valSpan);
+      const subSpan=document.createElement('span');
+      subSpan.className=`lb-rank-sub ${pctCls}`;
+      subSpan.textContent=pctTxt;
+      row.appendChild(subSpan);
+      priceList.appendChild(row);
+    });
+  }
+};
+
+/* ── hook into game events ── */
+/* Override renderLeaderboard to use online version */
+window.renderLeaderboard = window.renderLeaderboardOnline;
+
+/* push on coin/sell/nickname/shop changes */
+const _origDoSell = window.doSell;
+window.doSell = function(){
+  _origDoSell && _origDoSell();
+  setTimeout(pushMyData, 950);
+};
+
+const _origSetNick = window.setNickname;
+window.setNickname = function(){
+  _origSetNick && _origSetNick();
+  setTimeout(pushMyData, 100);
+};
+
+const _origBuy = window.buyItem;
+window.buyItem = function(i){
+  _origBuy && _origBuy(i);
+  setTimeout(pushMyData, 500);
+};
+
+const _origAdjCoins = window.adjustCoins;
+window.adjustCoins = function(d){
+  _origAdjCoins && _origAdjCoins(d);
+  setTimeout(pushMyData, 100);
+};
+
+const _origSetCoins = window.setCoins;
+window.setCoins = function(v){
+  _origSetCoins && _origSetCoins(v);
+  setTimeout(pushMyData, 100);
+};
+
+/* initial push after page loads */
+setTimeout(pushMyData, 1500);
+
+</script>
+</body>
+</html>
