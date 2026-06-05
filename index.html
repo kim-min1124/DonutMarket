@@ -1252,10 +1252,10 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 /* ── unique player ID stored in sessionStorage ── */
-let playerId = sessionStorage.getItem('donut_pid');
+let playerId = localStorage.getItem('donut_pid');
 if(!playerId){
   playerId = 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-  sessionStorage.setItem('donut_pid', playerId);
+  localStorage.setItem('donut_pid', playerId);
 }
 
 /* ── push my data to Firebase ── */
