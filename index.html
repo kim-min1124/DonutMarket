@@ -462,7 +462,7 @@ body{
   <div id="lb-coins-card">
     <div class="lb-section-header">
       <span class="lb-section-icon">&#x1F4B0;</span>
-      <span class="lb-section-title">소지금 순위</span>
+      <span class="lb-section-title">역대 소지금 순위</span>
     </div>
     <div id="lb-coins-list"></div>
   </div>
@@ -511,6 +511,7 @@ const DONUTS = [
 
 const HISTORY_LEN = 10;
 let coins = 0;
+let maxCoins = 0; /* 역대 최고 소지금 */
 let selected = 0;
 let amount = 0;
 let timerSec = 180;
@@ -794,6 +795,7 @@ function doSell(){
   if(amount<=0||s.inv<amount) return;
   const earned=amount*s.price;
   s.inv-=amount;coins+=earned;
+  if(coins>maxCoins) maxCoins=coins;
   const sellPct=Math.round((s.price-DONUTS[selected].basePrice)/DONUTS[selected].basePrice*100);
   sellHistory.push({donutIdx:selected,price:s.price,pct:sellPct});
   document.getElementById('coin-count').textContent=fmt(coins);
@@ -1052,7 +1054,7 @@ function renderLeaderboard(){
   const nameEl=document.getElementById('lb-my-name');
   if(nameEl) nameEl.textContent=myNickname+myBadges();
   const coinsEl=document.getElementById('lb-my-coins');
-  if(coinsEl) coinsEl.textContent=fmt(coins);
+  if(coinsEl) coinsEl.textContent=fmt(maxCoins);
   const iconEl=document.getElementById('lb-my-coins-icon');
   if(iconEl){ iconEl.textContent=''; iconEl.appendChild(document.createTextNode(E.coin)); }
 
@@ -1063,7 +1065,7 @@ function renderLeaderboard(){
 
   /* ── coin ranking ── */
   const allPlayers=[
-    {name:myNickname, coins:coins, isMe:true},
+    {name:myNickname, coins:maxCoins, isMe:true},
     ...FAKE_PLAYERS.map(p=>({name:p.name,coins:p.coins,isMe:false}))
   ];
   allPlayers.sort((a,b)=>b.coins-a.coins);
@@ -1187,10 +1189,14 @@ function pushMyData(){
     const finalBest = bestSell
       ? { donutIdx: bestSell.donutIdx, price: bestSell.price, pct: bestSell.pct }
       : existingBest;
+    const existingMax = existing && existing.maxCoins ? existing.maxCoins : 0;
+    const finalMax = Math.max(maxCoins, existingMax);
+    if(finalMax > maxCoins) maxCoins = finalMax; /* sync local with DB */
     set(playerRef, {
       nickname: myNickname,
       badges: SHOP_ITEMS.filter((_,i)=>purchased[i]).map(item=>item.emoji).join(''),
       coins: coins,
+      maxCoins: finalMax,
       bestSell: finalBest,
       updatedAt: Date.now()
     });
@@ -1226,10 +1232,10 @@ window.renderLeaderboardOnline = function(){
 
   /* ── coin ranking ── */
   const coinEntries = [
-    { nickname: myNickname + myBadgesLocal(), coins: coins, isMe: true }
+    { nickname: myNickname + myBadgesLocal(), coins: maxCoins, isMe: true }
   ];
   Object.values(remotePlayers).forEach(p=>{
-    coinEntries.push({ nickname: (p.nickname||'?') + (p.badges||''), coins: p.coins||0, isMe: false });
+    coinEntries.push({ nickname: (p.nickname||'?') + (p.badges||''), coins: p.maxCoins||p.coins||0, isMe: false });
   });
   coinEntries.sort((a,b)=>b.coins-a.coins);
   const top5c = coinEntries.slice(0,5);
