@@ -24,20 +24,22 @@ body{
   background:#E8E8E0;
   min-height:100vh;
   display:flex;justify-content:center;align-items:flex-start;
-  padding:24px 16px 40px;
+  padding:24px 24px 40px;
 }
 #layout{
   display:flex;
   gap:16px;
-  align-items:flex-start;
+  align-items:stretch;
+  justify-content:center;
   width:100%;
-  max-width:calc(var(--market-w) + var(--debug-w) + 16px);
-  transition:max-width 0.3s ease;
+  max-width:1200px;
+  margin:0 auto;
 }
-#layout.debug-wide{
-  max-width:calc(var(--market-w) + var(--debug-w) + var(--debug-w) + 32px);
+#shop-col-wrapper{
+  width:180px;
+  flex-shrink:0;
 }
-#left-col{
+#center-col{
   width:var(--market-w);
   flex-shrink:0;
   display:flex;
@@ -46,38 +48,22 @@ body{
 }
 #right-col{
   flex:1;
-  min-width:0;
+  min-width:240px;
+  max-width:320px;
   display:flex;
   flex-direction:column;
   gap:12px;
-}
-
-/* when debug unlocked: lb-col and debug-col side by side */
-#right-col.debug-open{
-  flex-direction:row;
-  align-items:flex-start;
-  gap:16px;
-}
-#right-col.debug-open #lb-col{
-  flex:1;
-  min-width:0;
-}
-#right-col.debug-open #debug-col{
-  width:var(--debug-w);
-  flex-shrink:0;
+  align-self:stretch;
 }
 #lb-col{
   display:flex;
   flex-direction:column;
   gap:12px;
-}
-#debug-col{
-  width:100%;
+  flex:1;
 }
 
 /* ── MARKET COLUMN ── */
 #market-col{
-  width:100%;
   background:var(--bg);
   border-radius:24px;
   overflow:hidden;
@@ -178,15 +164,15 @@ body{
 
 /* SHOP COLUMN */
 #shop-col{
-  width:100%;
   background:var(--bg);
   border-radius:20px;
   overflow:hidden;
   box-shadow:0 8px 32px rgba(0,0,0,0.12);
+  align-self:flex-start;
 }
 .shop-col-header{background:var(--green);padding:13px 16px 11px;}
 .shop-col-title{font-family:'Fredoka One',sans-serif;font-size:17px;color:#fff;}
-#shop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px;}
+#shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px;}
 .shop-cell{background:var(--card);border-radius:14px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;box-shadow:var(--shadow);transition:transform 0.15s,box-shadow 0.15s;position:relative;user-select:none;-webkit-user-select:none;}
 .shop-cell:hover:not(.sold){transform:translateY(-2px);box-shadow:var(--shadow-md);}
 .shop-cell:active:not(.sold){transform:scale(0.98);}
@@ -197,32 +183,39 @@ body{
 .shop-sold-badge{position:absolute;inset:0;background:rgba(255,255,255,0.82);display:flex;align-items:center;justify-content:center;border-radius:14px;}
 .shop-sold-text{font-size:11px;font-weight:800;color:var(--muted);}
 
-/* RESET PANEL */
-#reset-panel{
-  width:100%;
+/* BOTTOM BAR */
+#bottom-bar{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
 .reset-panel-btn{
-  width:100%;padding:13px 16px;
-  background:#fff;border:1.5px solid #FFCCCC;border-radius:20px;
-  color:#E53E3E;font-size:14px;font-weight:800;
+  width:100%;padding:12px 16px;
+  background:#FFE4E4;border:1.5px solid #FFCCCC;border-radius:14px;
+  color:#E53E3E;font-size:13px;font-weight:800;
   font-family:'Nunito',sans-serif;cursor:pointer;
   transition:background 0.15s;
-  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
 }
-.reset-panel-btn:hover{background:#fff0f0;}
+.reset-panel-btn:hover{background:#FFCECE;}
 
 /* LEADERBOARD */
 #lb-col{width:100%;display:flex;flex-direction:column;gap:12px;}
-#lb-nick-card,#lb-coins-card,#lb-price-card{
+#lb-nick-card,#lb-coins-card{
   background:var(--card);border-radius:20px;overflow:hidden;
   box-shadow:0 8px 32px rgba(0,0,0,0.12);
+}
+#lb-price-card{
+  background:var(--card);border-radius:20px;overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,0.12);
+  flex:1;
 }
 .lb-section-header{
   background:var(--green);padding:13px 16px 11px;
   display:flex;align-items:center;gap:8px;
 }
 .lb-section-icon{font-size:16px;line-height:1;}
-.lb-section-title{font-family:'Fredoka One',sans-serif;font-size:17px;color:#fff;}
+.lb-section-title{font-family:'Nunito',sans-serif;font-size:15px;color:#fff;font-weight:900;letter-spacing:0.3px;}
 .lb-nick-row{display:flex;gap:8px;padding:14px 14px 8px;}
 .lb-nick-input{
   flex:1;border:2px solid var(--border);border-radius:10px;
@@ -274,10 +267,10 @@ body{
 /* AD COUNT BAR */
 #ad-count-bar{
   display:flex;align-items:center;gap:6px;
-  padding:12px 18px;
+  padding:11px 16px;
   background:var(--card);
-  border-radius:20px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.12);
+  border-radius:14px;
+  box-shadow:var(--shadow);
 }
 #ad-count-icon{font-size:14px;line-height:1;}
 #ad-count-label{font-size:11px;font-weight:700;color:var(--muted);flex:1;}
@@ -317,19 +310,27 @@ body{
 /* responsive: stack on narrow screens */
 @media(max-width:900px){
   body{padding:0;}
-  #layout{flex-direction:column;gap:0;}
-  #left-col{width:100%;}
+  #layout{flex-direction:column;gap:0;max-width:100%;}
+  #center-col{width:100%;}
+  #shop-col{border-radius:0;width:100%;}
   #market-col{border-radius:0;}
-  #shop-col{border-radius:0;}
-  #debug-col{border-radius:0;}
+  #right-col{max-width:100%;min-width:0;width:100%;}
 }
 </style>
 </head>
 <body>
 <div id="layout">
 
-<!-- ══ LEFT COLUMN ══ -->
-<div id="left-col">
+<!-- ══ SHOP COLUMN ══ -->
+<div id="shop-col">
+  <div class="shop-col-header">
+    <span class="shop-col-title">&#x1F6D2; Shop</span>
+  </div>
+  <div id="shop-grid"></div>
+</div>
+
+<!-- ══ CENTER COLUMN ══ -->
+<div id="center-col">
 
 <!-- ══ MARKET COLUMN ══ -->
 <div id="market-col">
@@ -424,24 +425,18 @@ body{
   </div><!-- /#content-area -->
 </div><!-- /#market-col -->
 
-<!-- AD COUNT BAR -->
-<div id="ad-count-bar">
-  <span id="ad-count-icon">🎬</span>
-  <span id="ad-count-label">광고 시청</span>
-  <span id="ad-count-num">0</span>
-  <span style="font-size:11px;color:var(--muted);font-weight:700;">회</span>
-</div>
-
-<!-- ══ SHOP COLUMN ══ -->
-<div id="shop-col">
-  <div class="shop-col-header">
-    <span class="shop-col-title">&#x1F6D2; Shop</span>
+<!-- AD COUNT BAR + RESET -->
+<div id="bottom-bar">
+  <div id="ad-count-bar">
+    <span id="ad-count-icon">🎬</span>
+    <span id="ad-count-label">광고 시청</span>
+    <span id="ad-count-num">0</span>
+    <span style="font-size:11px;color:var(--muted);font-weight:700;">회</span>
   </div>
-  <div id="shop-grid"></div>
+  <button class="reset-panel-btn" onclick="confirmReset()">🔄 게임 초기화</button>
 </div>
 
-
-</div><!-- /#left-col -->
+</div><!-- /#center-col -->
 
 <!-- ══ RIGHT COLUMN ══ -->
 <div id="right-col">
@@ -486,11 +481,6 @@ body{
   </div>
 
 </div><!-- /#lb-col -->
-
-<!-- ══ RESET PANEL ══ -->
-<div id="reset-panel">
-  <button class="reset-panel-btn" onclick="confirmReset()">🔄 게임 초기화</button>
-</div>
 
 </div><!-- /#right-col -->
 
