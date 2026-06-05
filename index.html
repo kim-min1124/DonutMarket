@@ -874,7 +874,7 @@ function gameReset(){
   purchased=[false,false,false,false,false,false];
   updateCharItems();
   adWatchCount=0;
-  sellHistory=[];
+  /* sellHistory는 초기화하지 않음 — Firebase 기록 유지 */
   const adNum=document.getElementById('ad-count-num');
   if(adNum) adNum.textContent=0;
   goHome();
