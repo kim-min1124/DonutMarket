@@ -92,6 +92,14 @@ body{
 .inventory-panel{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:3px;}
 .inv-row{background:rgba(255,255,255,0.88);border-radius:50px;padding:4px 9px;display:flex;align-items:center;gap:5px;font-weight:700;font-size:12px;color:var(--text);box-shadow:0 1px 5px rgba(0,0,0,0.08);}
 .inv-row span:last-child{min-width:34px;text-align:right;}
+#spawn-timer-bar{
+  position:absolute;top:130px;right:10px;
+  background:rgba(255,255,255,0.82);border-radius:50px;
+  padding:3px 10px;font-size:10px;font-weight:800;color:var(--muted);
+  white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.08);
+  z-index:2;
+}
+#spawn-timer-val{color:var(--green-dark);}
 .character{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);font-size:64px;animation:bob 2s ease-in-out infinite;filter:drop-shadow(0 6px 12px rgba(0,0,0,0.1));cursor:default;user-select:none;line-height:1;}
 @keyframes bob{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(-7px);}}
 
@@ -338,6 +346,7 @@ body{
       <div class="inv-row"><span id="inv-icon-2" style="line-height:1;display:flex;align-items:center;font-size:13px;"></span><span id="inv-2">10.3K</span></div>
       <div class="inv-row"><span id="inv-icon-3" style="line-height:1;display:flex;align-items:center;font-size:13px;"></span><span id="inv-3">0</span></div>
     </div>
+    <div id="spawn-timer-bar">도넛 생성까지 <span id="spawn-timer-val">30</span>초</div>
     <div class="character" id="char-el"></div>
     <div class="char-item" id="ci-0" style="left:18px;top:60px;display:none;animation-delay:0s;"></div>
     <div class="char-item" id="ci-1" style="right:80px;top:55px;display:none;animation-delay:0.3s;"></div>
@@ -515,6 +524,9 @@ let maxCoins = 0; /* 역대 최고 소지금 */
 let selected = 0;
 let amount = 0;
 let timerSec = 180;
+let spawnSec = 30;
+const SPAWN_INTERVAL = 30;
+const SPAWN_MAX = 300;
 let adCooldown = false;
 let adWatchCount = 0;
 
@@ -845,11 +857,37 @@ function watchAd(){
 
 /* ── TIMER ── */
 function updateTimer(){
+  /* price update timer */
   timerSec--;
   if(timerSec<=0){tickAll();return;}
   const m=String(Math.floor(timerSec/60)).padStart(2,'0');
   const s=String(timerSec%60).padStart(2,'0');
   const tv=document.getElementById('timer-val');if(tv)tv.textContent=`${m}:${s}`;
+
+  /* spawn timer */
+  spawnSec--;
+  const sv=document.getElementById('spawn-timer-val');
+  if(sv) sv.textContent=spawnSec;
+  if(spawnSec<=0){
+    spawnDonuts();
+    spawnSec=SPAWN_INTERVAL;
+    if(sv) sv.textContent=spawnSec;
+  }
+}
+
+function spawnDonuts(){
+  let spawned=false;
+  state.forEach((s,i)=>{
+    if(s.inv<SPAWN_MAX){
+      s.inv=Math.min(SPAWN_MAX, s.inv+1);
+      spawned=true;
+    }
+  });
+  if(spawned){
+    updateInvDisplay();
+    renderList();
+    saveLocal();
+  }
 }
 
 /* ── DEBUG ── */
@@ -1155,6 +1193,7 @@ function saveLocal(){
     localStorage.setItem('dm_purchased', JSON.stringify(purchased));
     localStorage.setItem('dm_sellHistory', JSON.stringify(sellHistory));
     localStorage.setItem('dm_adCount', adWatchCount);
+    localStorage.setItem('dm_inv', JSON.stringify(state.map(s=>s.inv)));
   }catch(e){}
 }
 
@@ -1172,6 +1211,11 @@ function loadLocal(){
     if(sh) sellHistory=JSON.parse(sh);
     const ad=localStorage.getItem('dm_adCount');
     if(ad!==null) adWatchCount=parseInt(ad)||0;
+    const inv=localStorage.getItem('dm_inv');
+    if(inv){
+      const arr=JSON.parse(inv);
+      arr.forEach((v,i)=>{ if(state[i]) state[i].inv=v; });
+    }
   }catch(e){}
 }
 
